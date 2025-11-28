@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Your Game Hub</title>
+
   <style>
     :root{
       --sky:#9ad3ff;
@@ -11,175 +12,185 @@
       --grass:#7ed957;
       --accent:#2b8a3e;
       --leaf-text:#064;
-      --ui-bg: rgba(255,255,255,0.85);
       --cursor-color:#2b8a3e;
+      --cursor-shape:circle;
     }
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0;font-family:Inter,Arial;color:#063;cursor:none}
-    body{background:linear-gradient(180deg,var(--sky) 0 55%,var(--water) 55% 72%,var(--grass) 72% 100%);}    
-
-    /* Cursor */
-    #cursor{
-      position:fixed;
-      top:0;left:0;
-      width:22px;height:22px;
-      background:var(--cursor-color);
-      border-radius:50%;
-      pointer-events:none;
-      z-index:20000;
-      transform:translate(-50%,-50%);
-      transition:background .15s,width .15s,height .15s;
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      height:100%;
+      background:linear-gradient(180deg,var(--sky) 0 55%,var(--water)55%72%,var(--grass)72%100%);
+      font-family:Inter,Arial;
+      color:#063;
+      cursor:none;
+      overflow-y:auto;
     }
-    .cursor-locked{width:0;height:0;opacity:0;}
 
-    header{padding:20px;display:flex;justify-content:space-between;align-items:center}
-    h1{margin:0;font-size:24px}
-    .status{background:var(--ui-bg);padding:8px 12px;border-radius:8px;font-weight:bold}
+    header{display:flex;justify-content:space-between;align-items:center;padding:20px;}
+    h1{font-size:22px;}
 
-    main{max-width:1200px;margin:auto;padding:20px;display:grid;grid-template-columns:1fr 320px;gap:20px}
+    main{max-width:1100px;margin:20px auto;padding:20px;}
 
-    .leaf-grid{display:flex;flex-wrap:wrap;gap:16px}
+    .leaf-grid{display:flex;flex-wrap:wrap;gap:18px;}
     .leaf{
-      width:180px;height:110px;background:linear-gradient(135deg,#d8f5d8,#baf0b3);
-      border-radius:60% 40% 60% 40% / 40% 60% 40% 60%;
-      display:flex;justify-content:center;align-items:center;text-decoration:none;
-      font-weight:bold;color:var(--leaf-text);
-      position:relative;cursor:none;
-      box-shadow:0 6px 14px rgba(0,0,0,0.15);
-      transition:transform .25s,filter .25s;
+      width:180px;height:110px;background:#d8f5d8;border-radius:60% 40% 60% 40%/40% 60% 40% 60%;
+      display:flex;align-items:center;justify-content:center;
+      font-weight:700;text-decoration:none;color:var(--leaf-text);
+      position:relative;cursor:pointer;
+      transition:0.25s;
     }
-    .leaf:hover{transform:translateY(-6px) scale(1.03);filter:brightness(1.1)}
+    .leaf:hover{transform:translateY(-8px)scale(1.02);}    
 
-    aside{background:var(--ui-bg);padding:14px;border-radius:12px}
-    aside h3{margin-top:0}
-    .form-row{margin-bottom:12px;display:flex;align-items:center;gap:8px}
+    /* Character preview */
+    #charPreview{
+      position:fixed;right:20px;bottom:20px;width:260px;height:260px;
+      background:white;border-radius:20px;display:none;
+      justify-content:center;align-items:center;
+      box-shadow:0 0 20px rgba(0,0,0,.2);
+      padding:10px;
+    }
+    #charPreview img{max-width:100%;max-height:100%;}
 
-    .chars{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
-    .char{width:70px;height:70px;border-radius:12px;background:white;display:flex;justify-content:center;align-items:center;box-shadow:0 3px 8px rgba(0,0,0,0.15)}
+    /* Custom cursor */
+    .custom-cursor{
+      position:fixed;top:0;left:0;width:26px;height:26px;
+      background:var(--cursor-color);
+      border-radius:50%;pointer-events:none;z-index:9999;
+      transform:translate(-50%,-50%);
+    }
 
-    #gameModal{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:none;justify-content:center;align-items:center;z-index:9999}
-    #gameBox{background:white;padding:20px;border-radius:14px;max-width:480px;width:90%}
-    #gameBox button{display:block;width:100%;padding:10px;margin:6px 0;border-radius:8px;font-size:16px;border:none;background:#7ed957;color:#053;font-weight:bold}
+    /* Right panel */
+    aside{margin-top:20px;padding:16px;background:white;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.1);}
+    .form-row{margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+    .form-row label{font-size:14px;}
+    .form-row input,.form-row select{padding:6px;border-radius:6px;border:1px solid #ccc;}
+
+    #stats{margin-top:10px;font-size:14px;}
+
+    footer{text-align:center;margin:30px 0;color:#063;}
   </style>
 </head>
 <body>
 
-<div id="cursor"></div>
-
 <header>
   <h1>Your Game Hub</h1>
-  <div class="status">Time: <span id="liveTime"></span> | Battery: <span id="battery"></span></div>
+  <div id="clock">--:--</div>
 </header>
 
 <main>
   <section>
+    <h2>Games</h2>
     <div class="leaf-grid">
-      <!-- AUTO-GENERATED GAME BUTTONS -->
-      <a class="leaf" data-game="1v1.LoL.html">1v1.LoL</a>
-      <a class="leaf" data-game="Amanda the Adventurer.html">Amanda</a>
-      <a class="leaf" data-game="Backrooms.html">Backrooms</a>
-      <a class="leaf" data-game="Baldi's Basics.html">Baldi's Basics</a>
-      <a class="leaf" data-game="Baseball Bros.html">Baseball Bros</a>
-      <a class="leaf" data-game="Basket Bros.html">Basket Bros</a>
-      <a class="leaf" data-game="Block Blast.html">Block Blast</a>
-      <a class="leaf" data-game="BuildNow.gg.html">BuildNow.gg</a>
-      <a class="leaf" data-game="Chat Bot (A._.I).html">Chat Bot</a>
-      <a class="leaf" data-game="Football Bros.html">Football Bros</a>
-      <a class="leaf" data-game="Friday Night Funkin.html">FNF</a>
-      <a class="leaf" data-game="Minecraft 1.21.4 (1).html">Minecraft</a>
-      <a class="leaf" data-game="OvO 2.html">OvO 2</a>
-      <a class="leaf" data-game="OvO 3 Dimensions.html">OvO 3D</a>
-      <a class="leaf" data-game="OvO.html">OvO</a>
-      <a class="leaf" data-game="Stickman Fight Ragdoll.html">Stickman Fight</a>
-      <a class="leaf" data-game="Stickman Hook.html">Stickman Hook</a>
+      <a class="leaf" onclick="selectChar('spongebob')">Spongebob</a>
+      <a class="leaf" onclick="selectChar('patrick')">Patrick</a>
+      <a class="leaf" onclick="selectChar('squidward')">Squidward</a>
+      <a class="leaf" onclick="selectChar('mickey')">Mickey Mouse</a>
+      <a class="leaf" onclick="selectChar('gumball')">Gumball</a>
+      <a class="leaf" onclick="selectChar('darwin')">Darwin</a>
+      <a class="leaf" onclick="selectChar('tom-and-jerry')">Tom & Jerry</a>
+      <a class="leaf" onclick="selectChar('teen-titans-go')">Teen Titans Go</a>
     </div>
   </section>
 
   <aside>
-    <h3>Customize Theme</h3>
-    <div class="form-row">
-      <label>Cursor Color:</label>
-      <input id="cursorColor" type="color" value="#2b8a3e" />
-    </div>
+    <h3>Customization</h3>
 
-    <button id="lockCursor">Lock Cursor</button>
-    <button id="unlockCursor">Unlock Cursor</button>
-
-    <h3>Character Themes</h3>
-    <div class="chars">
-      <img class="char" src="gumball.png" data-theme="gumball">
-      <img class="char" src="darwin.png" data-theme="darwin">
-      <img class="char" src="teen-titans-go.png" data-theme="ttg">
-      <img class="char" src="mickey.png" data-theme="mickey">
-      <img class="char" src="tom-and-jerry.png" data-theme="tj">
-      <img class="char" src="patrick.png" data-theme="patrick">
-      <img class="char" src="spongebob.png" data-theme="sb">
-      <img class="char" src="squidward.png" data-theme="squidward">
+    <div class="form-row"><label>Accent color</label>
+      <input type="color" id="accentPicker" onchange="applyAccent()">
     </div>
+    <div class="form-row"><label>Leaf text color</label>
+      <input type="color" id="leafTextPicker" onchange="applyLeafText()">
+    </div>
+    <div class="form-row"><label>Cursor color</label>
+      <input type="color" id="cursorPicker" onchange="applyCursorColor()">
+    </div>
+    <div class="form-row"><label>Cursor shape</label>
+      <select id="cursorShape" onchange="applyCursorShape()">
+        <option value="circle">Circle</option>
+        <option value="square">Square</option>
+      </select>
+    </div>
+    <div id="stats"></div>
   </aside>
 </main>
 
-<div id="gameModal">
-  <div id="gameBox">
-    <h3>Open Game</h3>
-    <button id="btnBlank">Open in about:blank</button>
-    <button id="btnBlob">Open as Blob URL</button>
-    <button id="btnFull">Open Fullscreen</button>
-    <button id="btnClose">Cancel</button>
-  </div>
-</div>
+<div id="charPreview"><img id="charImg"></div>
+<div class="custom-cursor" id="cursor"></div>
+
+<footer>
+  <div id="dateBox">--</div>
+  <div id="verse">Loading verse...</div>
+</footer>
 
 <script>
-  /* Cursor */
-  const cursor=document.getElementById('cursor');
-  document.addEventListener('mousemove',e=>{
-    cursor.style.left=e.clientX+'px';
-    cursor.style.top=e.clientY+'px';
+  /* ------------------ LIVE CLOCK ------------------ */
+  function updateClock(){
+    const now=new Date();
+    document.getElementById("clock").textContent=now.toLocaleTimeString();
+  }
+  setInterval(updateClock,1000);updateClock();
+
+  /* ------------------ DATE ------------------ */
+  function updateDate(){
+    const now=new Date();
+    document.getElementById("dateBox").textContent=now.toDateString();
+  }
+  updateDate();
+
+  /* ------------------ BIBLE VERSE ------------------ */
+  const verses=[
+    "John 3:16 — For God so loved the world...",
+    "Psalm 23:1 — The Lord is my shepherd...",
+    "Philippians 4:13 — I can do all things...",
+    "Proverbs 3:5 — Trust in the Lord with all your heart..."
+  ];
+  function updateVerse(){
+    const index=Math.floor(Math.random()*verses.length);
+    document.getElementById("verse").textContent=verses[index];
+  }
+  updateVerse();
+
+  /* ------------------ CHARACTER SYSTEM ------------------ */
+  function selectChar(name){
+    const img=document.getElementById("charImg");
+    img.src=name+".png";
+    document.getElementById("charPreview").style.display="flex";
+
+    const body=document.body;
+    if(name==="spongebob") body.style.background="linear-gradient(180deg, #fff68f, #ffffff)";
+    if(name==="patrick") body.style.background="linear-gradient(180deg, pink, lightgreen)";
+    if(name==="squidward") body.style.background="linear-gradient(180deg, #7ec8e3, #c1a57b)";
+    if(name==="mickey") body.style.background="linear-gradient(180deg, red, black)";
+    if(name==="gumball") body.style.background="linear-gradient(180deg, #66c0ff, #d0d0d0)";
+    if(name==="darwin") body.style.background="linear-gradient(180deg, orange, lightgreen)";
+    if(name==="tom-and-jerry") body.style.background="linear-gradient(180deg, gray, tan)";
+    if(name==="teen-titans-go") body.style.background="linear-gradient(180deg, #ff00ff,#00ffff,#ffff00,#00ff00,#ff0000)";
+  }
+
+  /* ------------------ CURSOR ------------------ */
+  const cursor=document.getElementById("cursor");
+  document.addEventListener("mousemove",e=>{
+    cursor.style.left=e.clientX+"px";
+    cursor.style.top=e.clientY+"px";
   });
+  function applyCursorColor(){cursor.style.background=document.getElementById("cursorPicker").value;}
+  function applyCursorShape(){
+    const shape=document.getElementById("cursorShape").value;
+    cursor.style.borderRadius=shape==="circle"?"50%":"0%";
+  }
 
-  document.getElementById('cursorColor').oninput=e=>{
-    document.documentElement.style.setProperty('--cursor-color',e.target.value);
-  };
+  /* ------------------ CUSTOM THEME ------------------ */
+  function applyAccent(){document.documentElement.style.setProperty("--accent",document.getElementById("accentPicker").value);}
+  function applyLeafText(){document.documentElement.style.setProperty("--leaf-text",document.getElementById("leafTextPicker").value);}
 
-  document.getElementById('lockCursor').onclick=()=>cursor.classList.add('cursor-locked');
-  document.getElementById('unlockCursor').onclick=()=>cursor.classList.remove('cursor-locked');
-
-  /* Time */
-  setInterval(()=>{
-    document.getElementById('liveTime').textContent=new Date().toLocaleTimeString();
-  },1000);
-
-  /* Battery */
-  navigator.getBattery().then(b=>{
-    function update(){document.getElementById('battery').textContent=Math.round(b.level*100)+'%';}
-    update();b.addEventListener('levelchange',update);
+  /* ------------------ BATTERY ------------------ */
+  navigator.getBattery?.().then(b=>{
+    function update(){
+      document.getElementById("stats").textContent=`Battery: ${Math.round(b.level*100)}%`;
+    }
+    update();
+    b.addEventListener("levelchange",update);
   });
+</script>
 
-  /* Game Modal */
-  let currentGame="";
-  document.querySelectorAll('.leaf').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      currentGame=btn.dataset.game;
-      document.getElementById('gameModal').style.display='flex';
-    });
-  });
-
-  document.getElementById('btnBlank').onclick=()=>{
-    window.open('about:blank').document.write(`<iframe src="${currentGame}" style="border:none;width:100%;height:100%"></iframe>`);
-  };
-
-  document.getElementById('btnBlob').onclick=()=>{
-    fetch(currentGame).then(r=>r.text()).then(txt=>{
-      const blob=new Blob([txt],{type:'text/html'});
-      const url=URL.createObjectURL(blob);
-      window.open(url);
-    });
-  };
-
-  document.getElementById('btnFull').onclick=()=>{
-    const w=window.open(currentGame);
-    w.document.body.requestFullscreen?.();
-  };
-
-  document.getElementById('btnClose').onclick=()=>{
-    document.getElementById('game
+</body>
+</html>
