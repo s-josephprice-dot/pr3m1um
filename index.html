@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>My Games — Nature Hub</title>
+  <title>Your Game Hub</title>
   <style>
     :root{
       --sky:#9ad3ff;
@@ -16,7 +16,7 @@
       --cursor-shape: circle; /* circle | square | star */
     }
     *{box-sizing:border-box}
-    html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;color:#063}
+    html,body{cursor:none;height:100%;margin:0;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;color:#063}
     body{
       background: linear-gradient(180deg,var(--sky) 0 55%, var(--water) 55% 72%, var(--grass) 72% 100%);
       overflow-y:auto;
@@ -38,7 +38,7 @@
     .sky-layer{position:absolute;inset:0;pointer-events:none}
     .cloud{position:absolute;top:20px;left:20px;width:160px;height:50px;border-radius:50px;background:rgba(255,255,255,0.85);filter:blur(2px);}
 
-    .leaf-grid{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start}
+    .leaf{cursor:none-grid{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start}
     .leaf{
       width:180px;height:110px;display:flex;align-items:center;justify-content:center;position:relative;text-align:center;text-decoration:none;color:var(--leaf-text);font-weight:700;padding:8px;border-radius:60% 40% 60% 40% / 40% 60% 40% 60%;background:linear-gradient(135deg,#d8f5d8,#baf0b3);box-shadow:0 8px 20px rgba(0,0,0,0.12);transition:transform .25s, box-shadow .25s, filter .25s;}
     .leaf::after{content:'';position:absolute;bottom:-12px;left:20px;width:6px;height:36px;background:#6b4b2a;border-radius:3px;transform:rotate(-12deg)}
@@ -78,7 +78,7 @@
     <div class="title">
       <div class="logo">🌿</div>
       <div>
-        <h1>Nature Games Hub</h1>
+        <h1>Your Game Hub</h1>
         <div class="small">Green grass • Blue skies • Playful leaves</div>
       </div>
     </div>
@@ -332,5 +332,98 @@
     // Make link clicks open in same tab (default) — nothing else needed
 
   </script>
+<div id="gameOptions" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center">
+  <div class="bg-white p-4 rounded-xl shadow-xl space-y-3 text-center w-64">
+    <h2 class="text-xl font-bold mb-2">Open Game</h2>
+    <button onclick="openAboutBlank()">Open in about:blank</button>
+    <button onclick="openBlob()">Open in Blob URL</button>
+    <button onclick="openFullscreen()">Fullscreen</button>
+    <button onclick="closeOptions()" class="mt-2" style="color:red;font-weight:bold;">Cancel</button>
+  </div>
+</div>
+<script>
+let selectedGame = '';
+function showOptions(game){
+  selectedGame = game;
+  document.getElementById('gameOptions').classList.remove('hidden');
+}
+function closeOptions(){
+  document.getElementById('gameOptions').classList.add('hidden');
+}
+function openAboutBlank(){
+  const win = window.open('about:blank');
+  fetch(selectedGame).then(r=>r.text()).then(html=> win.document.write(html));
+}
+function openBlob(){
+  fetch(selectedGame).then(r=>r.text()).then(html=>{
+    const blob = new Blob([html],{type:'text/html'});
+    const url = URL.createObjectURL(blob);
+    window.open(url);
+  });
+}
+function openFullscreen(){
+  window.location.href = selectedGame;
+}
+// Hide system cursor and show custom cursor
+const customCursor = document.createElement('div');
+customCursor.id = 'customCursor';
+customCursor.style.position = 'fixed';
+customCursor.style.width = '20px';
+customCursor.style.height = '20px';
+customCursor.style.borderRadius = '50%';
+customCursor.style.background = 'blue';
+customCursor.style.pointerEvents = 'none';
+customCursor.style.zIndex = '9999';
+document.body.appendChild(customCursor);
+
+window.addEventListener('mousemove', e => {
+  customCursor.style.left = e.clientX + 'px';
+  customCursor.style.top = e.clientY + 'px';
+});
+
+document.body.style.cursor = 'none';
+
+// Lock / Unlock Cursor
+function lockCursor(){
+  document.body.requestPointerLock();
+}
+function unlockCursor(){
+  document.exitPointerLock();
+}
+
+document.addEventListener('pointerlockchange', () => {
+  if(document.pointerLockElement){
+    customCursor.style.display = 'none';
+  } else {
+    customCursor.style.display = 'block';
+  }
+});
+
+// Keyboard shortcuts (L = lock, U = unlock)
+document.addEventListener('keydown', e => {
+  if(e.key.toLowerCase() === 'l') lockCursor();
+  if(e.key.toLowerCase() === 'u') unlockCursor();
+});
+
+// Buttons on screen
+const lockBtn = document.createElement('button');
+lockBtn.innerText = 'Lock Cursor';
+lockBtn.style.position = 'fixed';
+lockBtn.style.bottom = '20px';
+lockBtn.style.right = '120px';
+lockBtn.style.zIndex = '9999';
+lockBtn.onclick = lockCursor;
+document.body.appendChild(lockBtn);
+
+const unlockBtn = document.createElement('button');
+unlockBtn.innerText = 'Unlock Cursor';
+unlockBtn.style.position = 'fixed';
+unlockBtn.style.bottom = '20px';
+unlockBtn.style.right = '20px';
+unlockBtn.style.zIndex = '9999';
+unlockBtn.onclick = unlockCursor;
+document.body.appendChild(unlockBtn);
+
+</script>
 </body>
 </html>
