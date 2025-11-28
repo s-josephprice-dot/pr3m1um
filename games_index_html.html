@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>My Games — Nature Hub</title>
+  <style>
+    :root{
+      --sky:#9ad3ff;
+      --water:#57b3ff;
+      --grass:#7ed957;
+      --accent:#2b8a3e;
+      --leaf-text:#064;
+      --ui-bg: rgba(255,255,255,0.8);
+      --cursor-color: #2b8a3e;
+      --cursor-shape: circle; /* circle | square | star */
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;color:#063}
+    body{
+      background: linear-gradient(180deg,var(--sky) 0 55%, var(--water) 55% 72%, var(--grass) 72% 100%);
+      overflow-y:auto;
+    }
+    header{
+      padding:22px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;
+    }
+    .title{display:flex;align-items:center;gap:12px}
+    .logo{width:64px;height:64px;background:linear-gradient(180deg,#a7e7ff,#b8f1c9);border-radius:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,0.12)}
+    h1{margin:0;font-size:20px}
+    nav .controls{display:flex;gap:10px;align-items:center}
+    .status{background:var(--ui-bg);padding:8px 10px;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,0.08);font-weight:600}
+
+    main{max-width:1100px;margin:12px auto;padding:18px;}
+    .canvas-area{display:grid;grid-template-columns:1fr 340px;gap:18px;align-items:start}
+
+    /* left: game field */
+    .garden{background:rgba(255,255,255,0.5);padding:18px;border-radius:14px;min-height:420px;position:relative;overflow:hidden}
+    .sky-layer{position:absolute;inset:0;pointer-events:none}
+    .cloud{position:absolute;top:20px;left:20px;width:160px;height:50px;border-radius:50px;background:rgba(255,255,255,0.85);filter:blur(2px);}
+
+    .leaf-grid{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start}
+    .leaf{
+      width:180px;height:110px;display:flex;align-items:center;justify-content:center;position:relative;text-align:center;text-decoration:none;color:var(--leaf-text);font-weight:700;padding:8px;border-radius:60% 40% 60% 40% / 40% 60% 40% 60%;background:linear-gradient(135deg,#d8f5d8,#baf0b3);box-shadow:0 8px 20px rgba(0,0,0,0.12);transition:transform .25s, box-shadow .25s, filter .25s;}
+    .leaf::after{content:'';position:absolute;bottom:-12px;left:20px;width:6px;height:36px;background:#6b4b2a;border-radius:3px;transform:rotate(-12deg)}
+    .leaf .name{z-index:2;pointer-events:none}
+    .leaf .decor{position:absolute;inset:6px;border-radius:inherit;pointer-events:none}
+
+    .leaf:hover{transform:translateY(-8px) scale(1.02)}
+    .leaf:hover .decor{box-shadow:0 0 0 8px rgba(0,0,0,0.03) inset}
+
+    /* control panel */
+    aside.panel{background:var(--ui-bg);padding:14px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.08)}
+    .panel h3{margin:0 0 12px 0}
+    .form-row{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+    .form-row label{min-width:110px;font-size:14px}
+    input[type=color], select, button, input[type=range]{background:white;border:1px solid #ddd;padding:8px;border-radius:8px}
+    .small{font-size:13px;color:#065}
+
+    /* live widgets */
+    .widget{display:flex;align-items:center;justify-content:space-between;padding:8px;background:#fff;border-radius:8px;margin-bottom:10px}
+    .widget b{font-size:16px}
+
+    /* characters area (simple stylized badges) */
+    .chars{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    .char{width:72px;height:72px;background:rgba(255,255,255,0.9);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;padding:6px;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,0.08)}
+
+    footer{max-width:1100px;margin:18px auto;text-align:center;color:#064;}
+
+    /* custom cursor */
+    .custom-cursor{position:fixed;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .12s height .12s background-color .12s border-radius .12s}
+
+    /* responsiveness */
+    @media (max-width:900px){.canvas-area{grid-template-columns:1fr;}.panel{order:2}.chars{justify-content:center}}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="title">
+      <div class="logo">🌿</div>
+      <div>
+        <h1>Nature Games Hub</h1>
+        <div class="small">Green grass • Blue skies • Playful leaves</div>
+      </div>
+    </div>
+    <nav class="controls">
+      <div class="status" id="time">--:--:--</div>
+      <div class="status" id="battery">Battery: --%</div>
+      <button id="customizeBtn">Customize</button>
+    </nav>
+  </header>
+
+  <main>
+    <div class="canvas-area">
+      <section class="garden" aria-label="Game garden">
+        <div class="sky-layer">
+          <div class="cloud" style="left:10%;top:6%;width:220px;height:66px;opacity:.9"></div>
+          <div class="cloud" style="left:60%;top:28%;width:160px;height:46px;opacity:.85"></div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px">
+          <div style="font-weight:800;font-size:18px">Your Games</div>
+          <div class="small">Hover a leaf to preview your chosen accent</div>
+        </div>
+
+        <div class="leaf-grid" id="leafGrid">
+          <!-- Leaf links (game files provided) -->
+          <a class="leaf" href="1v1.LoL.html"><div class="decor"></div><div class="name">1v1.LoL</div></a>
+          <a class="leaf" href="Amanda the Adventurer.html"><div class="decor"></div><div class="name">Amanda the Adventurer</div></a>
+          <a class="leaf" href="Backrooms.html"><div class="decor"></div><div class="name">Backrooms</div></a>
+          <a class="leaf" href="Baldi's Basics.html"><div class="decor"></div><div class="name">Baldi's Basics</div></a>
+          <a class="leaf" href="Baseball Bros.html"><div class="decor"></div><div class="name">Baseball Bros</div></a>
+          <a class="leaf" href="Basket Bros.html"><div class="decor"></div><div class="name">Basket Bros</div></a>
+          <a class="leaf" href="Block Blast.html"><div class="decor"></div><div class="name">Block Blast</div></a>
+          <a class="leaf" href="BuildNow.gg.html"><div class="decor"></div><div class="name">BuildNow.gg</div></a>
+          <a class="leaf" href="Chat Bot (A._.I).html"><div class="decor"></div><div class="name">Chat Bot (A._.I)</div></a>
+          <a class="leaf" href="Football Bros.html"><div class="decor"></div><div class="name">Football Bros</div></a>
+          <a class="leaf" href="Friday Night Funkin.html"><div class="decor"></div><div class="name">Friday Night Funkin</div></a>
+          <a class="leaf" href="Minecraft 1.21.4 (1).html"><div class="decor"></div><div class="name">Minecraft 1.21.4</div></a>
+          <a class="leaf" href="OvO 2.html"><div class="decor"></div><div class="name">OvO 2</div></a>
+          <a class="leaf" href="OvO 3 Dimensions.html"><div class="decor"></div><div class="name">OvO 3 Dimensions</div></a>
+          <a class="leaf" href="OvO.html"><div class="decor"></div><div class="name">OvO</div></a>
+          <a class="leaf" href="Stickman Fight Ragdoll.html"><div class="decor"></div><div class="name">Stickman Fight Ragdoll</div></a>
+          <a class="leaf" href="Stickman Hook.html"><div class="decor"></div><div class="name">Stickman Hook</div></a>
+        </div>
+
+        <!-- Bible verse panel -->
+        <div id="verseBox" style="position:absolute;left:18px;bottom:18px;background:rgba(255,255,255,0.9);padding:12px;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,0.08);max-width:420px;font-size:14px">
+          <div style="font-weight:800;margin-bottom:6px">Daily Verse</div>
+          <div id="verseText">Loading verse...</div>
+        </div>
+      </section>
+
+      <aside class="panel">
+        <h3>Customize Home</h3>
+        <div class="form-row"><label>Accent color</label><input id="accentColor" type="color" value="#2b8a3e"></div>
+        <div class="form-row"><label>Leaf text color</label><input id="leafTextColor" type="color" value="#064"></div>
+        <div class="form-row"><label>Cursor color</label><input id="cursorColor" type="color" value="#2b8a3e"></div>
+        <div class="form-row"><label>Cursor shape</label>
+          <select id="cursorShape"><option value="circle">Circle</option><option value="square">Square</option><option value="star">Star</option></select>
+        </div>
+        <div class="form-row"><label>Theme</label>
+          <select id="presetTheme"><option value="day">Day (default)</option><option value="dusk">Dusk</option><option value="night">Night</option></select>
+        </div>
+        <div style="margin-top:10px"><button id="saveBtn">Save settings</button> <button id="resetBtn">Reset</button></div>
+
+        <hr style="margin:12px 0">
+        <div class="widget"><div><b>Local Time</b><div id="timeBig" class="small"></div></div><div id="tzNote" class="small"></div></div>
+        <div class="widget"><div><b>Battery</b><div id="batteryBig" class="small">--%</div></div><div id="charging" class="small"></div></div>
+
+        <h3 style="margin-top:12px">Cartoon badges</h3>
+        <div class="small">(Stylized placeholders — replace with images if you want)</div>
+        <div class="chars" id="chars">
+          <div class="char">Gumball</div>
+          <div class="char">Teen Titans<br>Go</div>
+          <div class="char">Mickey<br>Clubhouse</div>
+          <div class="char">Tom & Jerry</div>
+          <div class="char">SpongeBob<br>& Patrick</div>
+          <div class="char">Squidward</div>
+        </div>
+
+      </aside>
+    </div>
+  </main>
+
+  <footer>
+    Built with 🌿 — change settings in "Customize". Your preferences are saved locally.
+  </footer>
+
+  <!-- custom cursor element -->
+  <div id="customCursor" class="custom-cursor" aria-hidden="true"></div>
+
+  <script>
+    /* ---------- utilities & persistence ---------- */
+    const storage = {
+      get(k, d){try{return JSON.parse(localStorage.getItem(k)) ?? d}catch(e){return d}},
+      set(k,v){localStorage.setItem(k, JSON.stringify(v))}
+    }
+
+    /* ---------- time & battery ---------- */
+    function updateTime(){
+      const now=new Date();
+      const t = now.toLocaleTimeString();
+      document.getElementById('time').textContent = t;
+      document.getElementById('timeBig').textContent = t + ' • ' + now.toLocaleDateString();
+    }
+    updateTime(); setInterval(updateTime,1000);
+
+    // Battery API
+    async function initBattery(){
+      const el = document.getElementById('battery');
+      const big = document.getElementById('batteryBig');
+      try{
+        const bat = await navigator.getBattery();
+        function render(){
+          const pct = Math.round(bat.level*100);
+          el.textContent = 'Battery: '+pct+'%';
+          big.textContent = pct+'%';
+          document.getElementById('charging').textContent = bat.charging? 'Charging':'Not charging';
+        }
+        render();bat.addEventListener('levelchange',render);bat.addEventListener('chargingchange',render);
+      }catch(e){el.textContent='Battery: ?';big.textContent='?';}
+    }
+    initBattery();
+
+    /* ---------- cursor customization ---------- */
+    const cursorEl = document.getElementById('customCursor');
+    let cursorColor = storage.get('cursorColor', getComputedStyle(document.documentElement).getPropertyValue('--cursor-color') || '#2b8a3e');
+    let cursorShape = storage.get('cursorShape','circle');
+
+    function renderCursor(){
+      const size = 24;
+      cursorEl.style.width = size + 'px'; cursorEl.style.height = size + 'px';
+      cursorEl.style.background = cursorColor;
+      if(cursorShape==='circle') cursorEl.style.borderRadius='50%';
+      else if(cursorShape==='square') cursorEl.style.borderRadius='6px';
+      else if(cursorShape==='star') cursorEl.style.borderRadius='22% 0 22% 0';
+    }
+    renderCursor();
+
+    window.addEventListener('mousemove',e=>{
+      cursorEl.style.left = e.clientX + 'px'; cursorEl.style.top = e.clientY + 'px';
+    });
+
+    // UI bindings
+    document.getElementById('cursorColor').value = cursorColor;
+    document.getElementById('cursorShape').value = cursorShape;
+    document.getElementById('accentColor').value = storage.get('accentColor','#2b8a3e');
+    document.getElementById('leafTextColor').value = storage.get('leafTextColor','#064');
+    document.getElementById('presetTheme').value = storage.get('theme','day');
+
+    document.getElementById('cursorColor').addEventListener('input', (e)=>{cursorColor=e.target.value; renderCursor();});
+    document.getElementById('cursorShape').addEventListener('change',(e)=>{cursorShape=e.target.value;renderCursor()});
+
+    document.getElementById('saveBtn').addEventListener('click',()=>{
+      storage.set('cursorColor',cursorColor);storage.set('cursorShape',cursorShape);storage.set('accentColor',document.getElementById('accentColor').value);storage.set('leafTextColor',document.getElementById('leafTextColor').value);storage.set('theme',document.getElementById('presetTheme').value);
+      applyTheme();alert('Settings saved locally');
+    });
+    document.getElementById('resetBtn').addEventListener('click',()=>{localStorage.clear();location.reload()});
+
+    document.getElementById('customizeBtn').addEventListener('click',()=>{document.querySelector('.panel').scrollIntoView({behavior:'smooth'})});
+
+    function applyTheme(){
+      const accent = storage.get('accentColor', document.getElementById('accentColor').value || '#2b8a3e');
+      const leafText = storage.get('leafTextColor', document.getElementById('leafTextColor').value || '#064');
+      document.documentElement.style.setProperty('--accent', accent);
+      document.documentElement.style.setProperty('--leaf-text', leafText);
+      // apply accent glow to leaf hover via CSS variable on each leaf
+      document.querySelectorAll('.leaf').forEach(leaf=>{
+        leaf.addEventListener('mouseenter', ()=>{
+          leaf.style.boxShadow = `0 12px 30px ${accent}55`;
+          leaf.querySelector('.decor').style.boxShadow = `0 0 0 8px ${accent}33 inset`;
+        });
+        leaf.addEventListener('mouseleave', ()=>{
+          leaf.style.boxShadow = '';
+          leaf.querySelector('.decor').style.boxShadow = '';
+        });
+        leaf.style.color = leafText;
+      });
+
+      // theme presets
+      const theme = storage.get('theme', 'day');
+      if(theme==='day'){
+        document.documentElement.style.setProperty('--sky','#9ad3ff');
+        document.documentElement.style.setProperty('--water','#57b3ff');
+        document.documentElement.style.setProperty('--grass','#7ed957');
+      }else if(theme==='dusk'){
+        document.documentElement.style.setProperty('--sky','#ffc3a0');
+        document.documentElement.style.setProperty('--water','#6fb3ff');
+        document.documentElement.style.setProperty('--grass','#6ec06e');
+      }else if(theme==='night'){
+        document.documentElement.style.setProperty('--sky','#0b3b5c');
+        document.documentElement.style.setProperty('--water','#0f4c81');
+        document.documentElement.style.setProperty('--grass','#184d2b');
+      }
+    }
+
+    applyTheme();
+
+    /* ---------- daily bible verse that changes at midnight ---------- */
+    const verses = [
+      "For I know the plans I have for you. — Jeremiah 29:11",
+      "I can do all things through Christ who strengthens me. — Philippians 4:13",
+      "The LORD is my shepherd; I shall not want. — Psalm 23:1",
+      "Trust in the LORD with all your heart. — Proverbs 3:5",
+      "Be strong and courageous. Do not be afraid. — Joshua 1:9",
+      "Love one another. — John 13:34",
+      "Rejoice always. Pray without ceasing. — 1 Thessalonians 5:16-17",
+      "The light shines in the darkness. — John 1:5",
+      "Give thanks to the LORD, for he is good. — Psalm 107:1",
+      "Commit your work to the LORD, and your plans will be established. — Proverbs 16:3"
+    ];
+
+    function verseIndexForDate(d){
+      // number of days since a fixed epoch
+      const epoch = new Date(2020,0,1);
+      const days = Math.floor((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()) - Date.UTC(epoch.getFullYear(),epoch.getMonth(),epoch.getDate()))/86400000);
+      return Math.abs(days) % verses.length;
+    }
+    function renderVerse(){
+      const now = new Date();
+      const i = verseIndexForDate(now);
+      document.getElementById('verseText').textContent = verses[i];
+    }
+    renderVerse();
+    // schedule update at next midnight
+    function scheduleMidnightUpdate(){
+      const now = new Date();
+      const tomorrow = new Date(now.getFullYear(),now.getMonth(),now.getDate()+1,0,0,1);
+      const ms = tomorrow - now;
+      setTimeout(()=>{renderVerse(); scheduleMidnightUpdate();}, ms);
+    }
+    scheduleMidnightUpdate();
+
+    /* ---------- small accessibility & placeholders for cartoon characters ---------- */
+    // The "characters" area uses simple badges as placeholders. If you want to show official artwork,
+    // replace the .char divs with <img> tags pointing to your image files.
+
+    /* ---------- finishing touches ---------- */
+    // Ensure saved cursor settings used
+    (function loadSaved(){
+      const cc = storage.get('cursorColor');
+      const cs = storage.get('cursorShape');
+      if(cc) { cursorColor = cc; document.getElementById('cursorColor').value = cc }
+      if(cs) { cursorShape = cs; document.getElementById('cursorShape').value = cs }
+      renderCursor();
+    })();
+
+    // apply hover color from UI live
+    document.getElementById('accentColor').addEventListener('input',(e)=>{document.documentElement.style.setProperty('--accent', e.target.value)});
+    document.getElementById('leafTextColor').addEventListener('input',(e)=>{document.querySelectorAll('.leaf').forEach(l=>l.style.color=e.target.value)});
+
+    // Make link clicks open in same tab (default) — nothing else needed
+
+  </script>
+</body>
+</html>
