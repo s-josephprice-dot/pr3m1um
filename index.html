@@ -1,589 +1,178 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Your Games Hub</title>
-  <style>
-    :root{
-      --sky:#9ad3ff;
-      --water:#57b3ff;
-      --grass:#7ed957;
-      --accent:#2b8a3e;
-      --leaf-text:#064;
-      --ui-bg: rgba(255,255,255,0.85);
-      --cursor-color:#2b8a3e;
-      --cursor-shape:circle;
-      --verse-bg: rgba(255,255,255,0.95);
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,Arial;color:#063}
-    body{
-      background: linear-gradient(180deg,var(--sky) 0 55%, var(--water) 55% 72%, var(--grass) 72% 100%);
-      overflow-y:auto;
-      cursor:none; /* hide system cursor - our custom cursor will show */
-    }
-    header{padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
-    .title{display:flex;align-items:center;gap:12px}
-    .logo{width:56px;height:56px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;background:linear-gradient(180deg,#a7e7ff,#b8f1c9);box-shadow:0 6px 18px rgba(0,0,0,0.12)}
-    h1{margin:0;font-size:20px}
-    nav .controls{display:flex;gap:10px;align-items:center}
-    .status{background:var(--ui-bg);padding:8px 10px;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,0.06);font-weight:700;font-size:13px}
+<style>
+  :root{
+    --bg:#000;
+    --panel:#0a0a0a;
+    --accent:#00ff6a;
+    --text:#00ff99;
+    --leaf-bg:#001b0f;
+    --leaf-border:#00ff6a55;
+    --cursor-color:#00ff6a;
+    --verse-bg:rgba(0,255,90,0.08);
+  }
 
-    main{max-width:1100px;margin:14px auto;padding:18px}
-    .canvas-area{display:grid;grid-template-columns:1fr 340px;gap:18px;align-items:start}
+  *{box-sizing:border-box;font-family:monospace}
+  html,body{height:100%;margin:0;color:var(--text);background:#000;}
 
-    .garden{background:rgba(255,255,255,0.55);padding:18px;border-radius:14px;min-height:480px;position:relative;overflow:hidden}
-    .sky-layer{position:absolute;inset:0;pointer-events:none}
-    .cloud{position:absolute;top:20px;left:20px;width:160px;height:50px;border-radius:50px;background:rgba(255,255,255,0.85);filter:blur(2px)}
+  body{
+    background:#000;
+    cursor:none;
+    overflow-y:auto;
+  }
 
-    .leaf-grid{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start}
-    .leaf{
-      width:180px;height:110px;display:flex;align-items:center;justify-content:center;position:relative;text-align:center;text-decoration:none;color:var(--leaf-text);font-weight:800;padding:8px;border-radius:60% 40% 60% 40% / 40% 60% 40% 60%;background:linear-gradient(135deg,#d8f5d8,#baf0b3);box-shadow:0 8px 20px rgba(0,0,0,0.12);transition:transform .18s,box-shadow .18s;
-      user-select:none;
-      cursor:pointer;
-    }
-    .leaf .name{pointer-events:none;z-index:2}
-    .leaf .decor{position:absolute;inset:6px;border-radius:inherit;pointer-events:none}
-    .leaf::after{content:'';position:absolute;bottom:-12px;left:20px;width:6px;height:36px;background:#6b4b2a;border-radius:3px;transform:rotate(-12deg)}
-    .leaf:hover{transform:translateY(-8px) scale(1.02)}
+  /* Matrix falling code background */
+  body::before{
+    content:"";
+    position:fixed;
+    top:0;left:0;
+    width:100%;height:100%;
+    background:url('https://i.imgur.com/Hh8Xz0X.gif'); 
+    opacity:0.15;
+    pointer-events:none;
+    z-index:-1;
+  }
 
-    aside.panel{background:var(--ui-bg);padding:14px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.08)}
-    .panel h3{margin:0 0 12px 0}
-    .form-row{display:flex;gap:8px;align-items:center;margin-bottom:10px}
-    .form-row label{min-width:120px;font-size:14px}
-    input[type=color],select,button,input[type=range]{background:white;border:1px solid #ddd;padding:8px;border-radius:8px}
-    .small{font-size:13px;color:#065}
+  header{
+    padding:18px 20px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:#020202;
+    border-bottom:2px solid var(--accent);
+  }
 
-    .widget{display:flex;align-items:center;justify-content:space-between;padding:8px;background:#fff;border-radius:8px;margin-bottom:10px}
-    .widget b{font-size:15px}
+  .logo{
+    width:56px;height:56px;
+    border-radius:12px;
+    font-size:26px;
+    display:flex;align-items:center;justify-content:center;
+    background:#001a0e;
+    color:var(--accent);
+    box-shadow:0 0 15px #00ff6a55;
+  }
 
-    .chars{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-    .char{width:72px;height:72px;background:rgba(255,255,255,0.95);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;padding:6px;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,0.08);cursor:pointer}
+  h1{margin:0;font-size:22px;color:var(--accent)}
 
-    #verseBox{position:absolute;left:18px;bottom:18px;background:var(--verse-bg);padding:12px;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,0.08);max-width:420px;font-size:14px}
-    #verseBox b{display:block;margin-bottom:6px;font-weight:800}
+  .small{color:#00ffbb}
 
-    /* modal for game options & loading */
-    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;z-index:10000}
-    .modal{background:white;padding:18px;border-radius:12px;width:360px;max-width:92%;box-shadow:0 12px 40px rgba(0,0,0,.35);text-align:center}
-    .modal h2{margin:0 0 8px;font-size:18px}
-    .modal .msg{min-height:48px;margin-bottom:12px}
-    .modal .btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
-    .btn{background:var(--accent);color:white;border:none;padding:8px 10px;border-radius:8px;cursor:pointer;font-weight:700}
-    .btn.secondary{background:#eee;color:#053;border:1px solid #ddd}
-    .btn.warn{background:#ff6b6b}
+  .status{
+    background:#001a0e;
+    color:var(--accent);
+    border:1px solid var(--accent);
+    padding:8px 12px;
+    border-radius:8px;
+    font-weight:700;
+    text-shadow:0 0 6px #00ff6a;
+  }
 
-    /* character popup */
-    .char-panel{position:fixed;right:14px;top:100px;background:white;padding:12px;border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,.18);display:none;z-index:9999;min-width:160px;text-align:center}
-    .char-panel img{max-width:140px;max-height:140px;display:block;margin:0 auto 8px}
+  main{max-width:1100px;margin:18px auto;padding:18px}
 
-    /* custom cursor */
-    #customCursor{position:fixed;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);transition:width .12s,height .12s,background-color .12s,border-radius .12s;mix-blend-mode:normal;display:block}
+  .garden{
+    background:#020402cc;
+    padding:18px;
+    border-radius:12px;
+    border:1px solid #003f20;
+    box-shadow:0 0 20px #00ff6a33;
+    position:relative;
+  }
 
-    @media (max-width:900px){.canvas-area{grid-template-columns:1fr}.chars{justify-content:center}}
-  </style>
-</head>
-<body>
-  <header>
-    <div class="title">
-      <div class="logo">🌿</div>
-      <div>
-        <h1>Nature Games Hub</h1>
-        <div class="small">Green grass • Blue skies • Playful leaves</div>
-      </div>
-    </div>
+  .leaf-grid{
+    display:flex;
+    flex-wrap:wrap;
+    gap:18px;
+  }
 
-    <nav class="controls">
-      <div class="status" id="time">--:--:--</div>
-      <div class="status" id="battery">Battery: --%</div>
-      <button id="customizeBtn" class="status">Customize</button>
-    </nav>
-  </header>
+  .leaf{
+    width:180px;height:110px;
+    background:var(--leaf-bg);
+    border:2px solid var(--leaf-border);
+    border-radius:10px;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--text);
+    font-weight:900;
+    position:relative;
+    transition:0.15s;
+    box-shadow:0 0 15px #00ff6a22;
+  }
 
-  <main>
-    <div class="canvas-area">
-      <section class="garden" aria-label="Game garden" id="garden">
-        <div class="sky-layer" aria-hidden="true">
-          <div class="cloud" style="left:8%;top:6%;width:220px;height:66px;opacity:.9"></div>
-          <div class="cloud" style="left:60%;top:28%;width:160px;height:46px;opacity:.85"></div>
-        </div>
+  /* Glitch hover */
+  .leaf:hover{
+    transform:translateY(-6px) scale(1.02);
+    filter:drop-shadow(0 0 8px #00ff6a);
+  }
 
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px">
-          <div style="font-weight:800;font-size:18px">Your Games</div>
-          <div class="small">Hover a leaf to preview accent — click to open options</div>
-        </div>
+  .decor{display:none}
 
-        <div class="leaf-grid" id="leafGrid">
-          <!-- Game leaves: clicking them opens modal options -->
-          <div class="leaf" data-file="1v1.LoL.html" tabindex="0"><div class="decor"></div><div class="name">1v1.LoL</div></div>
-          <div class="leaf" data-file="Amanda the Adventurer.html" tabindex="0"><div class="decor"></div><div class="name">Amanda the Adventurer</div></div>
-          <div class="leaf" data-file="Backrooms.html" tabindex="0"><div class="decor"></div><div class="name">Backrooms</div></div>
-          <div class="leaf" data-file="Baldi's Basics.html" tabindex="0"><div class="decor"></div><div class="name">Baldi's Basics</div></div>
-          <div class="leaf" data-file="Baseball Bros.html" tabindex="0"><div class="decor"></div><div class="name">Baseball Bros</div></div>
-          <div class="leaf" data-file="Basket Bros.html" tabindex="0"><div class="decor"></div><div class="name">Basket Bros</div></div>
-          <div class="leaf" data-file="Block Blast.html" tabindex="0"><div class="decor"></div><div class="name">Block Blast</div></div>
-          <div class="leaf" data-file="BuildNow.gg.html" tabindex="0"><div class="decor"></div><div class="name">BuildNow.gg</div></div>
-          <div class="leaf" data-file="Chat Bot (A._.I).html" tabindex="0"><div class="decor"></div><div class="name">Chat Bot (A._.I)</div></div>
-          <div class="leaf" data-file="Football Bros.html" tabindex="0"><div class="decor"></div><div class="name">Football Bros</div></div>
-          <div class="leaf" data-file="Friday Night Funkin.html" tabindex="0"><div class="decor"></div><div class="name">Friday Night Funkin</div></div>
-          <div class="leaf" data-file="Minecraft 1.21.4 (1).html" tabindex="0"><div class="decor"></div><div class="name">Minecraft 1.21.4</div></div>
-          <div class="leaf" data-file="OvO 2.html" tabindex="0"><div class="decor"></div><div class="name">OvO 2</div></div>
-          <div class="leaf" data-file="OvO 3 Dimensions.html" tabindex="0"><div class="decor"></div><div class="name">OvO 3 Dimensions</div></div>
-          <div class="leaf" data-file="OvO.html" tabindex="0"><div class="decor"></div><div class="name">OvO</div></div>
-          <div class="leaf" data-file="Stickman Fight Ragdoll.html" tabindex="0"><div class="decor"></div><div class="name">Stickman Fight Ragdoll</div></div>
-          <div class="leaf" data-file="Stickman Hook.html" tabindex="0"><div class="decor"></div><div class="name">Stickman Hook</div></div>
-        </div>
+  aside.panel{
+    background:#020202;
+    border:1px solid #003f20;
+    padding:16px;
+    border-radius:12px;
+    box-shadow:0 0 18px #00ff6a22;
+  }
 
-        <div id="verseBox">
-          <b>Daily Verse</b>
-          <div id="verseText">Loading verse...</div>
-        </div>
-      </section>
+  .widget{
+    background:#000;
+    padding:10px;
+    border:1px solid #003f20;
+    border-radius:8px;
+  }
 
-      <aside class="panel">
-        <h3>Customize Home</h3>
-        <div class="form-row"><label>Accent color</label><input id="accentColor" type="color" value="#2b8a3e"></div>
-        <div class="form-row"><label>Leaf text color</label><input id="leafTextColor" type="color" value="#064"></div>
-        <div class="form-row"><label>Cursor color</label><input id="cursorColor" type="color" value="#2b8a3e"></div>
-        <div class="form-row"><label>Cursor shape</label>
-          <select id="cursorShape"><option value="circle">Circle</option><option value="square">Square</option><option value="star">Star</option></select>
-        </div>
-        <div class="form-row"><label>Theme</label>
-          <select id="presetTheme"><option value="day">Day</option><option value="dusk">Dusk</option><option value="night">Night</option></select>
-        </div>
-        <div style="margin-top:10px"><button id="saveBtn" class="btn">Save settings</button> <button id="resetBtn" class="btn secondary">Reset</button></div>
+  input,select,button{
+    background:#000;
+    color:var(--accent);
+    border:1px solid var(--accent);
+    border-radius:6px;
+    padding:6px;
+  }
 
-        <hr style="margin:12px 0">
+  button.btn{
+    background:var(--accent);
+    color:#000;
+    border:none;
+    font-weight:900;
+    text-transform:uppercase;
+    box-shadow:0 0 8px #00ff6a;
+  }
 
-        <div class="widget"><div><b>Local Time</b><div id="timeBig" class="small">--:--:--</div></div><div id="dateBig" class="small">--</div></div>
-        <div class="widget"><div><b>Battery</b><div id="batteryBig" class="small">--%</div></div><div id="charging" class="small"></div></div>
+  .btn.secondary{
+    background:#111;
+    color:var(--accent);
+    border:1px solid var(--accent);
+  }
 
-        <h3 style="margin-top:12px">Cartoon badges</h3>
-        <div class="small">Click a character to preview them and change background</div>
-        <div class="chars" id="chars">
-          <div class="char" data-char="gumball">Gumball</div>
-          <div class="char" data-char="teen-titans">Teen Titans Go</div>
-          <div class="char" data-char="mickey">Mickey</div>
-          <div class="char" data-char="tomandjerry">Tom & Jerry</div>
-          <div class="char" data-char="spongebob">SpongeBob</div>
-          <div class="char" data-char="patrick">Patrick</div>
-          <div class="char" data-char="squidward">Squidward</div>
-          <div class="char" data-char="darwin">Darwin</div>
-        </div>
-      </aside>
-    </div>
-  </main>
+  footer{
+    text-align:center;
+    padding:10px;
+    color:var(--accent);
+  }
 
-  <footer style="max-width:1100px;margin:18px auto;text-align:center;color:#064">Built with 🌿 — preferences saved locally</footer>
+  /* neon cursor */
+  #customCursor{
+    width:18px;height:18px;
+    background:var(--cursor-color);
+    border-radius:50%;
+    position:fixed;
+    pointer-events:none;
+    box-shadow:0 0 12px #00ff6a;
+    z-index:9999;
+  }
 
-  <!-- custom cursor -->
-  <div id="customCursor" aria-hidden="true"></div>
+  /* modal */
+  .modal{
+    background:#000;
+    color:var(--text);
+    border:2px solid var(--accent);
+    box-shadow:0 0 20px var(--accent);
+  }
 
-  <!-- modal: options & goofy loader -->
-  <div id="modalBackdrop" class="modal-backdrop" role="dialog" aria-hidden="true">
-    <div class="modal" role="document" aria-labelledby="modalTitle">
-      <h2 id="modalTitle">Open Game</h2>
-      <div class="msg" id="modalMsg">Preparing...</div>
-      <div class="btns" id="modalButtons" style="display:none">
-        <button class="btn" id="openAboutBlankBtn">Open in about:blank</button>
-        <button class="btn" id="openBlobBtn">Open in Blob URL</button>
-        <button class="btn" id="openFullscreenBtn">Open Fullscreen</button>
-      </div>
-      <div style="margin-top:8px"><button class="btn secondary" id="modalCancel">Cancel</button></div>
-    </div>
-  </div>
+  .char-panel{
+    background:#000;
+    border:1px solid var(--accent);
+  }
 
-  <!-- character preview panel -->
-  <div id="charPanel" class="char-panel" aria-hidden="true">
-    <img id="charImg" src="" alt="">
-    <div id="charName" style="font-weight:800;margin-bottom:6px"></div>
-    <div id="charDesc" class="small"></div>
-  </div>
-
-  <script>
-    /* ---------- persistence ---------- */
-    const storage = {
-      get(k,d){ try{ return JSON.parse(localStorage.getItem(k)) ?? d }catch(e){ return d } },
-      set(k,v){ localStorage.setItem(k, JSON.stringify(v)) }
-    };
-
-    /* ---------- live time/date ---------- */
-    function updateTime(){
-      const now = new Date();
-      document.getElementById('time').textContent = now.toLocaleTimeString();
-      document.getElementById('timeBig').textContent = now.toLocaleTimeString();
-      document.getElementById('dateBig').textContent = now.toLocaleDateString();
-    }
-    updateTime(); setInterval(updateTime,1000);
-
-    /* ---------- battery ---------- */
-    async function initBattery(){
-      const el = document.getElementById('batteryBig');
-      const small = document.getElementById('charging');
-      try{
-        const bat = await navigator.getBattery();
-        function render(){
-          const pct = Math.round(bat.level*100);
-          el.textContent = pct + '%';
-          document.getElementById('battery').textContent = 'Battery: ' + pct + '%';
-          small.textContent = bat.charging ? 'Charging' : 'Not charging';
-        }
-        render();
-        bat.addEventListener('levelchange', render);
-        bat.addEventListener('chargingchange', render);
-      }catch(e){
-        el.textContent = '?';
-        document.getElementById('battery').textContent = 'Battery: ?';
-        small.textContent = '';
-      }
-    }
-    initBattery();
-
-    /* ---------- bible verses (rotates daily at midnight) ---------- */
-    const verses = [
-      "For I know the plans I have for you. — Jeremiah 29:11",
-      "I can do all things through Christ who strengthens me. — Philippians 4:13",
-      "The LORD is my shepherd; I shall not want. — Psalm 23:1",
-      "Trust in the LORD with all your heart. — Proverbs 3:5",
-      "Be strong and courageous. Do not be afraid. — Joshua 1:9",
-      "Love one another. — John 13:34",
-      "Rejoice always. Pray without ceasing. — 1 Thessalonians 5:16-17",
-      "The light shines in the darkness. — John 1:5",
-      "Give thanks to the LORD, for he is good. — Psalm 107:1",
-      "Commit your work to the LORD, and your plans will be established. — Proverbs 16:3",
-      "The Lord is near to the brokenhearted. — Psalm 34:18",
-      "Be still, and know that I am God. — Psalm 46:10"
-    ];
-    function verseIndexForDate(d){
-      const epoch = new Date(2020,0,1);
-      const days = Math.floor((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()) - Date.UTC(epoch.getFullYear(),epoch.getMonth(),epoch.getDate()))/86400000);
-      return Math.abs(days) % verses.length;
-    }
-    function renderVerse(){
-      const now = new Date();
-      document.getElementById('verseText').textContent = verses[verseIndexForDate(now)];
-    }
-    renderVerse();
-    function scheduleMidnightUpdate(){
-      const now = new Date();
-      const tomorrow = new Date(now.getFullYear(),now.getMonth(),now.getDate()+1,0,0,1);
-      setTimeout(()=>{ renderVerse(); scheduleMidnightUpdate(); }, tomorrow - now);
-    }
-    scheduleMidnightUpdate();
-
-    /* ---------- custom cursor ---------- */
-    const customCursor = document.getElementById('customCursor');
-    function applyCursorStyle(color, shape){
-      customCursor.style.width = '22px';
-      customCursor.style.height = '22px';
-      customCursor.style.background = color;
-      if(shape === 'circle') customCursor.style.borderRadius = '50%';
-      else if(shape === 'square') customCursor.style.borderRadius = '6px';
-      else if(shape === 'star') customCursor.style.borderRadius = '22% 0 22% 0';
-      customCursor.style.boxShadow = '0 4px 10px rgba(0,0,0,0.12)';
-    }
-    let cursorColor = storage.get('cursorColor', getComputedStyle(document.documentElement).getPropertyValue('--cursor-color') || '#2b8a3e');
-    let cursorShape = storage.get('cursorShape', 'circle');
-    applyCursorStyle(cursorColor, cursorShape);
-    // keep cursor visible and follow pointer
-    window.addEventListener('mousemove', e => {
-      customCursor.style.left = e.clientX + 'px';
-      customCursor.style.top = e.clientY + 'px';
-      customCursor.style.display = 'block';
-    });
-
-    /* ---------- settings UI ---------- */
-    document.getElementById('cursorColor').value = cursorColor;
-    document.getElementById('cursorShape').value = cursorShape;
-    document.getElementById('accentColor').value = storage.get('accentColor', '#2b8a3e');
-    document.getElementById('leafTextColor').value = storage.get('leafTextColor', '#064');
-    document.getElementById('presetTheme').value = storage.get('theme', 'day');
-
-    document.getElementById('cursorColor').addEventListener('input', e => {
-      cursorColor = e.target.value; applyCursorStyle(cursorColor, cursorShape);
-    });
-    document.getElementById('cursorShape').addEventListener('change', e => {
-      cursorShape = e.target.value; applyCursorStyle(cursorColor, cursorShape);
-    });
-    document.getElementById('saveBtn').addEventListener('click', ()=>{
-      storage.set('cursorColor', cursorColor);
-      storage.set('cursorShape', cursorShape);
-      storage.set('accentColor', document.getElementById('accentColor').value);
-      storage.set('leafTextColor', document.getElementById('leafTextColor').value);
-      storage.set('theme', document.getElementById('presetTheme').value);
-      applyTheme();
-      alert('Settings saved locally');
-    });
-    document.getElementById('resetBtn').addEventListener('click', ()=>{ localStorage.clear(); location.reload(); });
-
-    function applyTheme(){
-      const accent = storage.get('accentColor', document.getElementById('accentColor').value || '#2b8a3e');
-      const leafText = storage.get('leafTextColor', document.getElementById('leafTextColor').value || '#064');
-      document.documentElement.style.setProperty('--accent', accent);
-      document.documentElement.style.setProperty('--leaf-text', leafText);
-      document.querySelectorAll('.leaf').forEach(leaf=>{
-        leaf.style.color = leafText;
-        leaf.onmouseenter = ()=>{ leaf.style.boxShadow = `0 12px 30px ${accent}55`; leaf.querySelector('.decor').style.boxShadow = `0 0 0 8px ${accent}33 inset` }
-        leaf.onmouseleave = ()=>{ leaf.style.boxShadow = ''; leaf.querySelector('.decor').style.boxShadow = '' }
-      });
-      const theme = storage.get('theme', document.getElementById('presetTheme').value || 'day');
-      if(theme === 'day'){
-        document.documentElement.style.setProperty('--sky','#9ad3ff');
-        document.documentElement.style.setProperty('--water','#57b3ff');
-        document.documentElement.style.setProperty('--grass','#7ed957');
-      }else if(theme === 'dusk'){
-        document.documentElement.style.setProperty('--sky','#ffc3a0');
-        document.documentElement.style.setProperty('--water','#6fb3ff');
-        document.documentElement.style.setProperty('--grass','#6ec06e');
-      }else{
-        document.documentElement.style.setProperty('--sky','#0b3b5c');
-        document.documentElement.style.setProperty('--water','#0f4c81');
-        document.documentElement.style.setProperty('--grass','#184d2b');
-      }
-    }
-    applyTheme();
-
-    /* ---------- game modal, goofy messages, open buttons ---------- */
-    const modalBackdrop = document.getElementById('modalBackdrop');
-    const modalMsg = document.getElementById('modalMsg');
-    const modalButtons = document.getElementById('modalButtons');
-    const openAboutBlankBtn = document.getElementById('openAboutBlankBtn');
-    const openBlobBtn = document.getElementById('openBlobBtn');
-    const openFullscreenBtn = document.getElementById('openFullscreenBtn');
-    const modalCancel = document.getElementById('modalCancel');
-
-    let selectedGameFile = null;
-    let loadingMessages = [
-      "Loading... grab a snack 🍪",
-      "Its okay to lose lil bro 😅",
-      "Calibrating your vibes... hold up",
-      "Warming up the pixels 🔥",
-      "One more second, epicness incoming...",
-      "Not a bug — a feature in disguise 🤔",
-      "If it lags blame the squirrels 🐿️",
-      "Pumped and loading... nearly there"
-    ];
-
-    // show options modal with goofy loader
-    function showGameOptions(file){
-      selectedGameFile = file;
-      modalBackdrop.style.display = 'flex';
-      modalBackdrop.setAttribute('aria-hidden','false');
-      modalMsg.textContent = 'Preparing...';
-      modalButtons.style.display = 'none';
-      // animate messages
-      let i = 0;
-      const int = setInterval(()=>{
-        modalMsg.textContent = loadingMessages[i % loadingMessages.length];
-        i++;
-      }, 550);
-      // after a short delay show buttons and final message
-      setTimeout(()=>{
-        clearInterval(int);
-        modalMsg.textContent = `Ready — ${file}`;
-        if(shouldAutoLock(file)) modalMsg.textContent += ' (auto-lock available in-game)';
-        modalButtons.style.display = 'flex';
-      }, 1800);
-    }
-    function hideGameOptions(){
-      modalBackdrop.style.display = 'none';
-      modalBackdrop.setAttribute('aria-hidden','true');
-      selectedGameFile = null;
-    }
-    modalCancel.addEventListener('click', hideGameOptions);
-
-    function shouldAutoLock(file){
-      const f = (file || '').toLowerCase();
-      return f.includes('1v1.lol') || f.includes('buildnow') || f.includes('buildnow.gg');
-    }
-
-    async function fetchGameHtml(file){
-      try{
-        const res = await fetch(file);
-        if(!res.ok) throw new Error('Fetch failed: ' + res.status);
-        return await res.text();
-      }catch(e){
-        return `<html><body><h2>Failed to load ${file}</h2><pre>${e.toString()}</pre></body></html>`;
-      }
-    }
-
-    // Open in about:blank and inject helper script
-    openAboutBlankBtn.addEventListener('click', async ()=>{
-      if(!selectedGameFile) return;
-      modalMsg.textContent = 'Opening in about:blank...';
-      const html = await fetchGameHtml(selectedGameFile);
-      const win = window.open('about:blank');
-      if(!win){ modalMsg.textContent = 'Popup blocked — allow popups'; return; }
-      const helper = `
-        <script>
-          (function(){
-            function addBtn(){
-              const b = document.createElement('button');
-              b.textContent = 'Lock Cursor';
-              b.style.position='fixed';b.style.zIndex=999999;b.style.right='12px';b.style.bottom='12px';b.style.padding='10px 12px';b.style.borderRadius='8px';b.style.background='#2b8a3e';b.style.color='white';b.style.border='none';b.style.cursor='pointer';
-              b.onclick = ()=>{ if(document.body.requestPointerLock) { document.body.requestPointerLock(); b.textContent='Locked? (press Esc to exit)'; } else { alert('Pointer Lock not supported in this context'); } }
-              document.addEventListener('DOMContentLoaded', ()=>{ document.body.appendChild(b); });
-            }
-            document.addEventListener('DOMContentLoaded', addBtn);
-            // show a compact hint for specific games
-            function addHint(){
-              const path = location.pathname.toLowerCase();
-              if(path.includes('1v1.lol') || path.includes('buildnow')){
-                const o = document.createElement('div');
-                o.textContent = 'Tip: Click "Lock Cursor" to lock pointer while you play.';
-                o.style.position='fixed'; o.style.left='12px'; o.style.top='12px'; o.style.background='rgba(0,0,0,0.6)'; o.style.color='white'; o.style.padding='8px 10px'; o.style.borderRadius='8px'; o.style.zIndex='999999';
-                document.addEventListener('DOMContentLoaded', ()=>document.body.appendChild(o));
-              }
-            }
-            document.addEventListener('DOMContentLoaded', addHint);
-          })();
-        <\/script>
-      `;
-      // write the fetched HTML plus our helper into the new window
-      try{
-        win.document.open();
-        win.document.write(html + helper);
-        win.document.close();
-      }catch(e){
-        modalMsg.textContent = 'Could not write to about:blank window';
-      }
-      hideGameOptions();
-    });
-
-    // Open via Blob URL
-    openBlobBtn.addEventListener('click', async ()=>{
-      if(!selectedGameFile) return;
-      modalMsg.textContent = 'Creating blob URL...';
-      const html = await fetchGameHtml(selectedGameFile);
-      const helper = `
-        <script>
-          (function(){
-            function addBtn(){
-              const b = document.createElement('button');
-              b.textContent = 'Lock Cursor';
-              b.style.position='fixed';b.style.zIndex=999999;b.style.right='12px';b.style.bottom='12px';b.style.padding='10px 12px';b.style.borderRadius='8px';b.style.background='#2b8a3e';b.style.color='white';b.style.border='none';b.style.cursor='pointer';
-              b.onclick = ()=>{ if(document.body.requestPointerLock) { document.body.requestPointerLock(); b.textContent='Locked? (press Esc to exit)'; } else { alert('Pointer Lock not supported in this context'); } }
-              document.addEventListener('DOMContentLoaded', ()=>{ document.body.appendChild(b); });
-            }
-            document.addEventListener('DOMContentLoaded', addBtn);
-          })();
-        <\/script>
-      `;
-      const blob = new Blob([html + helper], {type:'text/html'});
-      const url = URL.createObjectURL(blob);
-      window.open(url);
-      hideGameOptions();
-    });
-
-    // "Fullscreen" button: navigate same tab to file
-    openFullscreenBtn.addEventListener('click', ()=> {
-      if(!selectedGameFile) return;
-      // navigate same tab (per your request)
-      window.location.href = selectedGameFile;
-    });
-
-    // make leaves clickable
-    document.querySelectorAll('.leaf').forEach(leaf=>{
-      leaf.addEventListener('click', (e)=>{
-        const file = leaf.getAttribute('data-file');
-        if(!file) return;
-        showGameOptions(file);
-      });
-      leaf.addEventListener('keydown', e => { if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); leaf.click(); } });
-      // small hover pop
-      leaf.addEventListener('mouseenter', ()=> {
-        leaf.style.transform = 'translateY(-10px) scale(1.03)';
-      });
-      leaf.addEventListener('mouseleave', ()=> {
-        leaf.style.transform = '';
-      });
-    });
-
-    /* ---------- characters preview & background color mapping ---------- */
-    const charMap = {
-      'spongebob': {name:'SpongeBob', bg:['#fff27a','#ffe9b6'], img:'spongebob.png'},
-      'patrick': {name:'Patrick', bg:['#ffd0e8','#c4ffda'], img:'patrick.png'},
-      'squidward': {name:'Squidward', bg:['#b7d7ff','#c9d0e0'], img:'squidward.png'},
-      'mickey': {name:'Mickey', bg:['#ffdfdf','#000000'], img:'mickey.png'},
-      'gumball': {name:'Gumball', bg:['#bfe7ff','#d3d3d3'], img:'gumball.png'},
-      'darwin': {name:'Darwin', bg:['#ffd4a8','#ccffb3'], img:'darwin.png'},
-      'tomandjerry': {name:'Tom & Jerry', bg:['#d9d9d9','#d7b89a'], img:'tom-and-jerry.png'},
-      'teen-titans': {name:'Teen Titans Go', bg:['linear-gradient(90deg,#00f,#f0f,#0ff,#0f0)'], img:'teen-titans-go.png'},
-      'default': {name:'Character', bg:['#fff','#eee'], img:''}
-    };
-
-    function showCharPanel(id){
-      const data = charMap[id] || charMap.default;
-      const panel = document.getElementById('charPanel');
-      const img = document.getElementById('charImg');
-      const name = document.getElementById('charName');
-      const desc = document.getElementById('charDesc');
-      name.textContent = data.name;
-      desc.textContent = `Preview: ${data.name}`;
-      if(data.img){
-        img.src = data.img;
-        img.style.display = 'block';
-      } else { img.style.display = 'none'; img.src=''; }
-      // change garden background colors
-      const garden = document.getElementById('garden');
-      if(id === 'teen-titans'){
-        garden.style.background = 'linear-gradient(90deg,#ff00ff,#00ffff,#00ff00)';
-      } else {
-        const g0 = (data.bg && data.bg[0]) || '#fff';
-        const g1 = (data.bg && data.bg[1]) || '#fff';
-        garden.style.background = `linear-gradient(180deg, ${g0} 0 55%, ${g1} 55% 100%)`;
-      }
-      panel.style.display = 'block';
-      setTimeout(()=>{ panel.style.display = 'none'; applyTheme(); }, 6000);
-    }
-
-    document.querySelectorAll('.char').forEach(c=>{
-      c.addEventListener('click', ()=>{
-        const id = c.getAttribute('data-char');
-        showCharPanel(id);
-      });
-    });
-
-    /* ---------- load images into chars if present in root (non-blocking) ---------- */
-    (function tryLoadCharImages(){
-      ['gumball','teen-titans','mickey','tom-and-jerry','patrick','spongebob','squidward','darwin'].forEach(name=>{
-        const imgName = name === 'tom-and-jerry' ? 'tom-and-jerry.png' :
-                        name === 'teen-titans' ? 'teen-titans-go.png' :
-                        (name + '.png');
-        const im = new Image();
-        im.src = imgName;
-        im.onload = ()=> {
-          const mapName = name === 'tom-and-jerry' ? 'tomandjerry' : (name === 'teen-titans' ? 'teen-titans' : name);
-          const el = Array.from(document.querySelectorAll('.char')).find(x=> x.getAttribute('data-char') === mapName);
-          if(el){
-            el.innerHTML = `<img src="${imgName}" alt="${name}" style="max-width:64px;max-height:64px;display:block;margin:0 auto;">`;
-          }
-        }
-      });
-    })();
-
-    /* ---------- load saved cursor settings on start ---------- */
-    (function loadSavedCursor(){
-      const cc = storage.get('cursorColor');
-      const cs = storage.get('cursorShape');
-      if(cc){ cursorColor = cc; document.getElementById('cursorColor').value = cc; }
-      if(cs){ cursorShape = cs; document.getElementById('cursorShape').value = cs; }
-      applyCursorStyle(cursorColor, cursorShape);
-    })();
-
-    /* ---------- accessibility: press Esc to hide modal ---------- */
-    window.addEventListener('keydown', e=>{
-      if(e.key === 'Escape'){ hideGameOptions(); document.getElementById('charPanel').style.display='none'; }
-    });
-
-    /* ---------- touch: visible feedback ---------- */
-    document.querySelectorAll('.leaf').forEach(l=>{
-      l.addEventListener('touchstart', ()=> l.classList.add('touched'));
-      l.addEventListener('touchend', ()=> l.classList.remove('touched'));
-    });
-
-    console.log('Nature Games Hub loaded — all features initialized.');
-  </script>
-</body>
-</html>
+  #verseBox{
+    background:var(--verse-bg);
+    border:1px solid #00ff6a55;
+    color:var(--text);
+  }
+</style>
