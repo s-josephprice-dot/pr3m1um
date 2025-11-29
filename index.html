@@ -1,9 +1,9 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>My Games — Nature Hub</title>
+  <title>Nature Games Hub</title>
   <style>
     :root{
       --sky:#9ad3ff;
@@ -11,66 +11,77 @@
       --grass:#7ed957;
       --accent:#2b8a3e;
       --leaf-text:#064;
-      --ui-bg: rgba(255,255,255,0.9);
-      --cursor-color: #2b8a3e;
-      --cursor-shape: circle;
+      --ui-bg: rgba(255,255,255,0.85);
+      --cursor-color:#2b8a3e;
+      --cursor-shape:circle;
+      --verse-bg: rgba(255,255,255,0.95);
     }
     *{box-sizing:border-box}
-    html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;color:#063;cursor:auto}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,Arial;color:#063}
     body{
       background: linear-gradient(180deg,var(--sky) 0 55%, var(--water) 55% 72%, var(--grass) 72% 100%);
       overflow-y:auto;
-      -webkit-font-smoothing:antialiased;
+      cursor:none; /* hide system cursor - our custom cursor will show */
     }
-
-    header{padding:22px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    header{padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
     .title{display:flex;align-items:center;gap:12px}
-    .logo{width:64px;height:64px;background:linear-gradient(180deg,#a7e7ff,#b8f1c9);border-radius:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,0.12)}
+    .logo{width:56px;height:56px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;background:linear-gradient(180deg,#a7e7ff,#b8f1c9);box-shadow:0 6px 18px rgba(0,0,0,0.12)}
     h1{margin:0;font-size:20px}
     nav .controls{display:flex;gap:10px;align-items:center}
-    .status{background:var(--ui-bg);padding:8px 10px;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,0.08);font-weight:600}
+    .status{background:var(--ui-bg);padding:8px 10px;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,0.06);font-weight:700;font-size:13px}
 
-    main{max-width:1100px;margin:12px auto;padding:18px}
+    main{max-width:1100px;margin:14px auto;padding:18px}
     .canvas-area{display:grid;grid-template-columns:1fr 340px;gap:18px;align-items:start}
 
-    .garden{background:rgba(255,255,255,0.5);padding:18px;border-radius:14px;min-height:420px;position:relative;overflow:hidden}
+    .garden{background:rgba(255,255,255,0.55);padding:18px;border-radius:14px;min-height:480px;position:relative;overflow:hidden}
     .sky-layer{position:absolute;inset:0;pointer-events:none}
     .cloud{position:absolute;top:20px;left:20px;width:160px;height:50px;border-radius:50px;background:rgba(255,255,255,0.85);filter:blur(2px)}
 
     .leaf-grid{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start}
-    .leaf{width:180px;height:110px;display:flex;align-items:center;justify-content:center;position:relative;text-align:center;text-decoration:none;color:var(--leaf-text);font-weight:700;padding:8px;border-radius:60% 40% 60% 40% / 40% 60% 40% 60%;background:linear-gradient(135deg,#d8f5d8,#baf0b3);box-shadow:0 8px 20px rgba(0,0,0,0.12);transition:transform .18s ease, box-shadow .18s ease}
-    .leaf::after{content:'';position:absolute;bottom:-12px;left:20px;width:6px;height:36px;background:#6b4b2a;border-radius:3px;transform:rotate(-12deg)}
-    .leaf .name{z-index:2;pointer-events:none}
+    .leaf{
+      width:180px;height:110px;display:flex;align-items:center;justify-content:center;position:relative;text-align:center;text-decoration:none;color:var(--leaf-text);font-weight:800;padding:8px;border-radius:60% 40% 60% 40% / 40% 60% 40% 60%;background:linear-gradient(135deg,#d8f5d8,#baf0b3);box-shadow:0 8px 20px rgba(0,0,0,0.12);transition:transform .18s,box-shadow .18s;
+      user-select:none;
+    }
+    .leaf .name{pointer-events:none;z-index:2}
     .leaf .decor{position:absolute;inset:6px;border-radius:inherit;pointer-events:none}
-    .leaf:hover{transform:translateY(-6px) scale(1.02)}
-    .leaf:hover .decor{box-shadow:0 0 0 8px rgba(0,0,0,0.03) inset}
+    .leaf::after{content:'';position:absolute;bottom:-12px;left:20px;width:6px;height:36px;background:#6b4b2a;border-radius:3px;transform:rotate(-12deg)}
+    .leaf:hover{transform:translateY(-8px) scale(1.02)}
 
     aside.panel{background:var(--ui-bg);padding:14px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.08)}
+    .panel h3{margin:0 0 12px 0}
     .form-row{display:flex;gap:8px;align-items:center;margin-bottom:10px}
-    .form-row label{min-width:110px;font-size:14px}
-    input[type=color], select, button, input[type=range]{background:white;border:1px solid #ddd;padding:8px;border-radius:8px}
+    .form-row label{min-width:120px;font-size:14px}
+    input[type=color],select,button,input[type=range]{background:white;border:1px solid #ddd;padding:8px;border-radius:8px}
     .small{font-size:13px;color:#065}
 
     .widget{display:flex;align-items:center;justify-content:space-between;padding:8px;background:#fff;border-radius:8px;margin-bottom:10px}
-    .widget b{font-size:16px}
+    .widget b{font-size:15px}
 
     .chars{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-    .char{width:72px;height:72px;background:rgba(255,255,255,0.9);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;padding:6px;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,0.08);cursor:pointer}
+    .char{width:72px;height:72px;background:rgba(255,255,255,0.95);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;padding:6px;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,0.08);cursor:pointer}
 
-    footer{max-width:1100px;margin:18px auto;text-align:center;color:#064}
+    #verseBox{position:absolute;left:18px;bottom:18px;background:var(--verse-bg);padding:12px;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,0.08);max-width:420px;font-size:14px}
+    #verseBox b{display:block;margin-bottom:6px;font-weight:800}
 
-    /* modal */
-    .modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);z-index:9998;opacity:0;pointer-events:none;transition:opacity .18s}
-    .modal.show{opacity:1;pointer-events:auto}
-    .modal-card{background:white;padding:18px;border-radius:12px;min-width:320px;max-width:90%;box-shadow:0 10px 40px rgba(0,0,0,0.3);text-align:center}
-    .loading-text{font-weight:800;margin:6px 0}
-    .rage-line{font-size:14px;margin:6px 0;color:#a22}
-    .modal-controls{display:flex;gap:8px;justify-content:center;margin-top:12px}
+    /* modal for game options & loading */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;z-index:10000}
+    .modal{background:white;padding:18px;border-radius:12px;width:360px;max-width:92%;box-shadow:0 12px 40px rgba(0,0,0,.35);text-align:center}
+    .modal h2{margin:0 0 8px;font-size:18px}
+    .modal .msg{min-height:48px;margin-bottom:12px}
+    .modal .btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+    .btn{background:var(--accent);color:white;border:none;padding:8px 10px;border-radius:8px;cursor:pointer;font-weight:700}
+    .btn.secondary{background:#eee;color:#053;border:1px solid #ddd}
+    .btn.warn{background:#ff6b6b}
 
-    /* small helpers */
-    .hidden{display:none}
+    /* character popup */
+    .char-panel{position:fixed;right:14px;top:100px;background:white;padding:12px;border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,.18);display:none;z-index:9999;min-width:160px;text-align:center}
+    .char-panel img{max-width:140px;max-height:140px;display:block;margin:0 auto 8px}
 
-    @media (max-width:900px){.canvas-area{grid-template-columns:1fr}.panel{order:2}.chars{justify-content:center}}
+    /* custom cursor */
+    #customCursor{position:fixed;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);transition:width .12s,height .12s,background-color .12s,border-radius .12s;mix-blend-mode:normal}
+
+    /* responsive */
+    @media (max-width:900px){.canvas-area{grid-template-columns:1fr}.chars{justify-content:center}}
   </style>
 </head>
 <body>
@@ -82,52 +93,52 @@
         <div class="small">Green grass • Blue skies • Playful leaves</div>
       </div>
     </div>
+
     <nav class="controls">
       <div class="status" id="time">--:--:--</div>
       <div class="status" id="battery">Battery: --%</div>
-      <button id="customizeBtn">Customize</button>
+      <button id="customizeBtn" class="status">Customize</button>
     </nav>
   </header>
 
   <main>
     <div class="canvas-area">
-      <section class="garden" aria-label="Game garden">
-        <div class="sky-layer">
-          <div class="cloud" style="left:10%;top:6%;width:220px;height:66px;opacity:.9"></div>
+      <section class="garden" aria-label="Game garden" id="garden">
+        <div class="sky-layer" aria-hidden="true">
+          <div class="cloud" style="left:8%;top:6%;width:220px;height:66px;opacity:.9"></div>
           <div class="cloud" style="left:60%;top:28%;width:160px;height:46px;opacity:.85"></div>
         </div>
 
         <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px">
           <div style="font-weight:800;font-size:18px">Your Games</div>
-          <div class="small">Click a leaf to open game options (modal)</div>
+          <div class="small">Hover a leaf to preview accent — click to open options</div>
         </div>
 
         <div class="leaf-grid" id="leafGrid">
-          <!-- Game links: these are files the user uploaded in repo root -->
-          <a class="leaf" data-game="1v1.LoL.html" href="#" onclick="return false;"><div class="decor"></div><div class="name">1v1.LoL</div></a>
-          <a class="leaf" data-game="Amanda the Adventurer.html" href="#" onclick="return false;"><div class="decor"></div><div class="name">Amanda the Adventurer</div></a>
-          <a class="leaf" data-game="Backrooms.html" href="#" onclick="return false;"><div class="decor"></div><div class="name">Backrooms</div></a>
-          <a class="leaf" data-game="Baldi's Basics.html" href="#" onclick="return false;"><div class="decor"></div><div class="name">Baldi's Basics</div></a>
-          <a class="leaf" data-game="Baseball Bros.html" href="#" onclick="return false;"><div class="decor"></div><div class="name">Baseball Bros</div></a>
-          <a class="leaf" data-game="Basket Bros.html" href="#" onclick="return false;"><div class="decor"></div><div class="name">Basket Bros</div></a>
-          <a class="leaf" data-game="Block Blast.html" href="#" onclick="return false;"><div class="decor"></div><div class="name">Block Blast</div></a>
-          <a class="leaf" data-game="BuildNow.gg.html" href="#" onclick="return false;"><div class="decor"></div><div class="name">BuildNow.gg</div></a>
-          <a class="leaf" data-game="Chat Bot (A._.I).html" href="#" onclick="return false;"><div class="decor"></div><div class="name">Chat Bot (A._.I)</div></a>
-          <a class="leaf" data-game="Football Bros.html" href="#" onclick="return false;"><div class="decor"></div><div class="name">Football Bros</div></a>
-          <a class="leaf" data-game="Friday Night Funkin.html" href="#" onclick="return false;"><div class="decor"></div><div class="name">Friday Night Funkin</div></a>
-          <a class="leaf" data-game="Minecraft 1.21.4 (1).html" href="#" onclick="return false;"><div class="decor"></div><div class="name">Minecraft 1.21.4</div></a>
-          <a class="leaf" data-game="OvO 2.html" href="#" onclick="return false;"><div class="decor"></div><div class="name">OvO 2</div></a>
-          <a class="leaf" data-game="OvO 3 Dimensions.html" href="#" onclick="return false;"><div class="decor"></div><div class="name">OvO 3 Dimensions</div></a>
-          <a class="leaf" data-game="OvO.html" href="#" onclick="return false;"><div class="decor"></div><div class="name">OvO</div></a>
-          <a class="leaf" data-game="Stickman Fight Ragdoll.html" href="#" onclick="return false;"><div class="decor"></div><div class="name">Stickman Fight Ragdoll</div></a>
-          <a class="leaf" data-game="Stickman Hook.html" href="#" onclick="return false;"><div class="decor"></div><div class="name">Stickman Hook</div></a>
+          <!-- Game leaves: clicking them opens modal options -->
+          <a class="leaf" data-file="1v1.LoL.html"><div class="decor"></div><div class="name">1v1.LoL</div></a>
+          <a class="leaf" data-file="Amanda the Adventurer.html"><div class="decor"></div><div class="name">Amanda the Adventurer</div></a>
+          <a class="leaf" data-file="Backrooms.html"><div class="decor"></div><div class="name">Backrooms</div></a>
+          <a class="leaf" data-file="Baldi's Basics.html"><div class="decor"></div><div class="name">Baldi's Basics</div></a>
+          <a class="leaf" data-file="Baseball Bros.html"><div class="decor"></div><div class="name">Baseball Bros</div></a>
+          <a class="leaf" data-file="Basket Bros.html"><div class="decor"></div><div class="name">Basket Bros</div></a>
+          <a class="leaf" data-file="Block Blast.html"><div class="decor"></div><div class="name">Block Blast</div></a>
+          <a class="leaf" data-file="BuildNow.gg.html"><div class="decor"></div><div class="name">BuildNow.gg</div></a>
+          <a class="leaf" data-file="Chat Bot (A._.I).html"><div class="decor"></div><div class="name">Chat Bot (A._.I)</div></a>
+          <a class="leaf" data-file="Football Bros.html"><div class="decor"></div><div class="name">Football Bros</div></a>
+          <a class="leaf" data-file="Friday Night Funkin.html"><div class="decor"></div><div class="name">Friday Night Funkin</div></a>
+          <a class="leaf" data-file="Minecraft 1.21.4 (1).html"><div class="decor"></div><div class="name">Minecraft 1.21.4</div></a>
+          <a class="leaf" data-file="OvO 2.html"><div class="decor"></div><div class="name">OvO 2</div></a>
+          <a class="leaf" data-file="OvO 3 Dimensions.html"><div class="decor"></div><div class="name">OvO 3 Dimensions</div></a>
+          <a class="leaf" data-file="OvO.html"><div class="decor"></div><div class="name">OvO</div></a>
+          <a class="leaf" data-file="Stickman Fight Ragdoll.html"><div class="decor"></div><div class="name">Stickman Fight Ragdoll</div></a>
+          <a class="leaf" data-file="Stickman Hook.html"><div class="decor"></div><div class="name">Stickman Hook</div></a>
         </div>
 
-        <div id="verseBox" style="position:absolute;left:18px;bottom:18px;background:rgba(255,255,255,0.95);padding:12px;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,0.08);max-width:420px;font-size:14px">
-          <div style="font-weight:800;margin-bottom:6px">Daily Verse</div>
+        <div id="verseBox">
+          <b>Daily Verse</b>
           <div id="verseText">Loading verse...</div>
         </div>
-
       </section>
 
       <aside class="panel">
@@ -139,80 +150,98 @@
           <select id="cursorShape"><option value="circle">Circle</option><option value="square">Square</option><option value="star">Star</option></select>
         </div>
         <div class="form-row"><label>Theme</label>
-          <select id="presetTheme"><option value="day">Day (default)</option><option value="dusk">Dusk</option><option value="night">Night</option></select>
+          <select id="presetTheme"><option value="day">Day</option><option value="dusk">Dusk</option><option value="night">Night</option></select>
         </div>
-        <div style="margin-top:10px"><button id="saveBtn">Save settings</button> <button id="resetBtn">Reset</button></div>
+        <div style="margin-top:10px"><button id="saveBtn" class="btn">Save settings</button> <button id="resetBtn" class="btn secondary">Reset</button></div>
 
         <hr style="margin:12px 0">
-        <div class="widget"><div><b>Local Time</b><div id="timeBig" class="small"></div></div><div id="tzNote" class="small"></div></div>
+
+        <div class="widget"><div><b>Local Time</b><div id="timeBig" class="small">--:--:--</div></div><div id="dateBig" class="small">--</div></div>
         <div class="widget"><div><b>Battery</b><div id="batteryBig" class="small">--%</div></div><div id="charging" class="small"></div></div>
 
         <h3 style="margin-top:12px">Cartoon badges</h3>
-        <div class="small">(Click a character to preview theme)</div>
+        <div class="small">Click a character to preview them and change background</div>
         <div class="chars" id="chars">
+          <!-- Use your images in root later OR these text fallbacks -->
           <div class="char" data-char="gumball">Gumball</div>
-          <div class="char" data-char="teen-titans">Teen Titans<br>Go</div>
-          <div class="char" data-char="mickey">Mickey<br>Clubhouse</div>
-          <div class="char" data-char="tom-and-jerry">Tom & Jerry</div>
-          <div class="char" data-char="spongebob">SpongeBob<br>& Patrick</div>
+          <div class="char" data-char="teen-titans">Teen Titans Go</div>
+          <div class="char" data-char="mickey">Mickey</div>
+          <div class="char" data-char="tomandjerry">Tom & Jerry</div>
+          <div class="char" data-char="spongebob">SpongeBob</div>
+          <div class="char" data-char="patrick">Patrick</div>
           <div class="char" data-char="squidward">Squidward</div>
+          <div class="char" data-char="darwin">Darwin</div>
         </div>
-
       </aside>
     </div>
   </main>
 
-  <footer>
-    Built with 🌿 — change settings in "Customize". Your preferences are saved locally.
-  </footer>
+  <footer style="max-width:1100px;margin:18px auto;text-align:center;color:#064">Built with 🌿 — preferences saved locally</footer>
 
-  <!-- Modal for game options + loading -->
-  <div id="gameModal" class="modal" aria-hidden="true">
-    <div class="modal-card">
-      <div id="modalTitle" style="font-size:16px;font-weight:800">Getting ready...</div>
-      <div class="loading-text" id="loadingText">Preparing your game</div>
-      <div class="rage-line" id="rageLine">Please wait...</div>
-      <div class="modal-controls">
-        <button id="btnAbout" disabled>Open in about:blank</button>
-        <button id="btnBlob" disabled>Open in Blob URL</button>
-        <button id="btnFS" disabled>Open Fullscreen</button>
-        <button id="btnCancel" style="background:transparent;color:#b33;border:0;font-weight:700">Cancel</button>
+  <!-- custom cursor -->
+  <div id="customCursor" aria-hidden="true"></div>
+
+  <!-- modal: options & goofy loader -->
+  <div id="modalBackdrop" class="modal-backdrop" role="dialog" aria-hidden="true">
+    <div class="modal" role="document" aria-labelledby="modalTitle">
+      <h2 id="modalTitle">Open Game</h2>
+      <div class="msg" id="modalMsg">Preparing...</div>
+      <div class="btns" id="modalButtons">
+        <button class="btn" id="openAboutBlankBtn">Open in about:blank</button>
+        <button class="btn" id="openBlobBtn">Open in Blob URL</button>
+        <button class="btn" id="openFullscreenBtn">Open Fullscreen</button>
       </div>
+      <div style="margin-top:8px"><button class="btn secondary" id="modalCancel">Cancel</button></div>
     </div>
   </div>
 
+  <!-- small character preview panel -->
+  <div id="charPanel" class="char-panel" aria-hidden="true">
+    <img id="charImg" src="" alt="">
+    <div id="charName" style="font-weight:800;margin-bottom:6px"></div>
+    <div id="charDesc" class="small"></div>
+  </div>
+
   <script>
-    // ---------- storage ----------
+    /* ---------- persistence ---------- */
     const storage = {
-      get(k,d){try{return JSON.parse(localStorage.getItem(k)) ?? d}catch(e){return d}},
-      set(k,v){localStorage.setItem(k,JSON.stringify(v))}
+      get(k,d){ try{ return JSON.parse(localStorage.getItem(k)) ?? d }catch(e){ return d } },
+      set(k,v){ localStorage.setItem(k, JSON.stringify(v)) }
     };
 
-    // ---------- time & battery ----------
+    /* ---------- live time/date ---------- */
     function updateTime(){
       const now = new Date();
       document.getElementById('time').textContent = now.toLocaleTimeString();
-      document.getElementById('timeBig').textContent = now.toLocaleTimeString() + ' • ' + now.toLocaleDateString();
+      document.getElementById('timeBig').textContent = now.toLocaleTimeString();
+      document.getElementById('dateBig').textContent = now.toLocaleDateString();
     }
     updateTime(); setInterval(updateTime,1000);
 
+    /* ---------- battery ---------- */
     async function initBattery(){
-      const el = document.getElementById('battery');
-      const big = document.getElementById('batteryBig');
+      const el = document.getElementById('batteryBig');
+      const small = document.getElementById('charging');
       try{
         const bat = await navigator.getBattery();
         function render(){
           const pct = Math.round(bat.level*100);
-          el.textContent = 'Battery: '+pct+'%';
-          big.textContent = pct+'%';
-          document.getElementById('charging').textContent = bat.charging? 'Charging':'Not charging';
+          el.textContent = pct + '%';
+          document.getElementById('battery').textContent = 'Battery: ' + pct + '%';
+          small.textContent = bat.charging ? 'Charging' : 'Not charging';
         }
-        render(); bat.addEventListener('levelchange',render); bat.addEventListener('chargingchange',render);
-      }catch(e){el.textContent='Battery: ?'; big.textContent='?';}
+        render();
+        bat.addEventListener('levelchange', render);
+        bat.addEventListener('chargingchange', render);
+      }catch(e){
+        el.textContent = '?';
+        document.getElementById('battery').textContent = 'Battery: ?';
+        small.textContent = '';
+      }
     }
     initBattery();
 
-    // ---------- verse that changes nightly ----------
+    /* ---------- bible verses (rotates daily at midnight) ---------- */
     const verses = [
       "For I know the plans I have for you. — Jeremiah 29:11",
       "I can do all things through Christ who strengthens me. — Philippians 4:13",
@@ -223,172 +252,338 @@
       "Rejoice always. Pray without ceasing. — 1 Thessalonians 5:16-17",
       "The light shines in the darkness. — John 1:5",
       "Give thanks to the LORD, for he is good. — Psalm 107:1",
-      "Commit your work to the LORD, and your plans will be established. — Proverbs 16:3"
+      "Commit your work to the LORD, and your plans will be established. — Proverbs 16:3",
+      "The Lord is near to the brokenhearted. — Psalm 34:18",
+      "Be still, and know that I am God. — Psalm 46:10"
     ];
-
     function verseIndexForDate(d){
       const epoch = new Date(2020,0,1);
-      const days = Math.floor((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())-Date.UTC(epoch.getFullYear(),epoch.getMonth(),epoch.getDate()))/86400000);
+      const days = Math.floor((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()) - Date.UTC(epoch.getFullYear(),epoch.getMonth(),epoch.getDate()))/86400000);
       return Math.abs(days) % verses.length;
     }
     function renderVerse(){
-      document.getElementById('verseText').textContent = verses[verseIndexForDate(new Date())];
+      const now = new Date();
+      document.getElementById('verseText').textContent = verses[verseIndexForDate(now)];
     }
     renderVerse();
-    // schedule midnight update
-    (function scheduleMidnight(){
+    function scheduleMidnightUpdate(){
       const now = new Date();
-      const tomorrow = new Date(now.getFullYear(),now.getMonth(),now.getDate()+1,0,0,2);
-      const ms = tomorrow - now;
-      setTimeout(()=>{renderVerse(); scheduleMidnight();}, ms);
-    })();
+      const tomorrow = new Date(now.getFullYear(),now.getMonth(),now.getDate()+1,0,0,1);
+      setTimeout(()=>{ renderVerse(); scheduleMidnightUpdate(); }, tomorrow - now);
+    }
+    scheduleMidnightUpdate();
 
-    // ---------- modal + loading messages ----------
-    const modal = document.getElementById('gameModal');
-    const loadingText = document.getElementById('loadingText');
-    const rageLine = document.getElementById('rageLine');
-    const btnAbout = document.getElementById('btnAbout');
-    const btnBlob = document.getElementById('btnBlob');
-    const btnFS = document.getElementById('btnFS');
-    const btnCancel = document.getElementById('btnCancel');
-    const modalTitle = document.getElementById('modalTitle');
+    /* ---------- custom cursor ---------- */
+    const customCursor = document.getElementById('customCursor');
+    // default style
+    function applyCursorStyle(color, shape){
+      customCursor.style.width = '22px';
+      customCursor.style.height = '22px';
+      customCursor.style.background = color;
+      if(shape === 'circle') customCursor.style.borderRadius = '50%';
+      else if(shape === 'square') customCursor.style.borderRadius = '6px';
+      else if(shape === 'star') customCursor.style.borderRadius = '22% 0 22% 0';
+      customCursor.style.boxShadow = '0 4px 10px rgba(0,0,0,0.12)';
+    }
+    // load saved
+    let cursorColor = storage.get('cursorColor', getComputedStyle(document.documentElement).getPropertyValue('--cursor-color') || '#2b8a3e');
+    let cursorShape = storage.get('cursorShape', 'circle');
+    applyCursorStyle(cursorColor, cursorShape);
+    window.addEventListener('mousemove', e => {
+      customCursor.style.left = e.clientX + 'px';
+      customCursor.style.top = e.clientY + 'px';
+      customCursor.style.display = 'block';
+    });
 
-    const rageMessages = [
-      "loading... why did you click already?",
-      "are you ready? it's loading like a potato",
-      "rage mode engaged: still loading",
-      "calm down, it's not a boss fight — yet",
-      "if this takes longer you owe me a snack",
-      "processing your hopes and dreams... 42%",
-      "oh come on. refresh? don't refresh.",
-      "the internet gremlins are working, please wait"
+    /* ---------- settings UI ---------- */
+    document.getElementById('cursorColor').value = cursorColor;
+    document.getElementById('cursorShape').value = cursorShape;
+    document.getElementById('accentColor').value = storage.get('accentColor', '#2b8a3e');
+    document.getElementById('leafTextColor').value = storage.get('leafTextColor', '#064');
+    document.getElementById('presetTheme').value = storage.get('theme', 'day');
+
+    document.getElementById('cursorColor').addEventListener('input', e => {
+      cursorColor = e.target.value; applyCursorStyle(cursorColor, cursorShape);
+    });
+    document.getElementById('cursorShape').addEventListener('change', e => {
+      cursorShape = e.target.value; applyCursorStyle(cursorColor, cursorShape);
+    });
+    document.getElementById('saveBtn').addEventListener('click', ()=>{
+      storage.set('cursorColor', cursorColor);
+      storage.set('cursorShape', cursorShape);
+      storage.set('accentColor', document.getElementById('accentColor').value);
+      storage.set('leafTextColor', document.getElementById('leafTextColor').value);
+      storage.set('theme', document.getElementById('presetTheme').value);
+      applyTheme();
+      alert('Settings saved locally');
+    });
+    document.getElementById('resetBtn').addEventListener('click', ()=>{ localStorage.clear(); location.reload(); });
+
+    function applyTheme(){
+      const accent = storage.get('accentColor', document.getElementById('accentColor').value || '#2b8a3e');
+      const leafText = storage.get('leafTextColor', document.getElementById('leafTextColor').value || '#064');
+      document.documentElement.style.setProperty('--accent', accent);
+      document.documentElement.style.setProperty('--leaf-text', leafText);
+      document.querySelectorAll('.leaf').forEach(leaf=>{
+        leaf.style.color = leafText;
+        leaf.onmouseenter = ()=>{ leaf.style.boxShadow = `0 12px 30px ${accent}55`; leaf.querySelector('.decor').style.boxShadow = `0 0 0 8px ${accent}33 inset` }
+        leaf.onmouseleave = ()=>{ leaf.style.boxShadow = ''; leaf.querySelector('.decor').style.boxShadow = '' }
+      });
+      const theme = storage.get('theme', document.getElementById('presetTheme').value || 'day');
+      if(theme === 'day'){
+        document.documentElement.style.setProperty('--sky','#9ad3ff');
+        document.documentElement.style.setProperty('--water','#57b3ff');
+        document.documentElement.style.setProperty('--grass','#7ed957');
+      }else if(theme === 'dusk'){
+        document.documentElement.style.setProperty('--sky','#ffc3a0');
+        document.documentElement.style.setProperty('--water','#6fb3ff');
+        document.documentElement.style.setProperty('--grass','#6ec06e');
+      }else{
+        document.documentElement.style.setProperty('--sky','#0b3b5c');
+        document.documentElement.style.setProperty('--water','#0f4c81');
+        document.documentElement.style.setProperty('--grass','#184d2b');
+      }
+    }
+    applyTheme();
+
+    /* ---------- game modal, goofy messages, open buttons ---------- */
+    const modalBackdrop = document.getElementById('modalBackdrop');
+    const modalMsg = document.getElementById('modalMsg');
+    const openAboutBlankBtn = document.getElementById('openAboutBlankBtn');
+    const openBlobBtn = document.getElementById('openBlobBtn');
+    const openFullscreenBtn = document.getElementById('openFullscreenBtn');
+    const modalCancel = document.getElementById('modalCancel');
+
+    let selectedGameFile = null;
+    let loadingMessages = [
+      "Loading... grab a snack 🍪",
+      "Its okay to lose lil bro 😅",
+      "Calibrating your vibes... hold up",
+      "Warming up the pixels 🔥",
+      "One more second, epicness incoming...",
+      "Not a bug — a feature in disguise 🤔",
+      "If it lags blame the squirrels 🐿️",
+      "Pumped and loading... nearly there"
     ];
 
-    let selectedGame = null;
-    let rageInterval = null;
-
-    function showModalForGame(game){
-      selectedGame = game;
-      modalTitle.textContent = `Open: ${game}`;
-      loadingText.textContent = `Preparing ${game}...`;
-      rageLine.textContent = rageMessages[0];
-      // disable buttons until "loaded"
-      btnAbout.disabled = btnBlob.disabled = btnFS.disabled = true;
-      modal.classList.add('show');
-
-      // cycle rage lines
-      let idx = 0;
-      clearInterval(rageInterval);
-      rageInterval = setInterval(()=>{
-        idx = (idx+1) % rageMessages.length;
-        rageLine.textContent = rageMessages[idx];
-      }, 600);
-
-      // simulate loading delay (short) then enable buttons
+    // show options modal with goofy loader
+    function showGameOptions(file){
+      selectedGameFile = file;
+      modalBackdrop.style.display = 'flex';
+      modalBackdrop.setAttribute('aria-hidden','false');
+      modalMsg.textContent = 'Preparing...';
+      // animate messages for 2.5s
+      let i = 0;
+      const int = setInterval(()=>{
+        modalMsg.textContent = loadingMessages[i % loadingMessages.length];
+        i++;
+      }, 550);
+      // after a short delay show buttons
       setTimeout(()=>{
-        clearInterval(rageInterval);
-        rageLine.textContent = "Ready! Use the buttons to open the game.";
-        btnAbout.disabled = btnBlob.disabled = btnFS.disabled = false;
-      }, 2000);
+        clearInterval(int);
+        modalMsg.textContent = `Ready — ${file}`;
+        // show special note if game has auto-lock
+        if(shouldAutoLock(file)) modalMsg.textContent += ' (auto-lock available in-game)';
+      }, 1800);
+    }
+    function hideGameOptions(){
+      modalBackdrop.style.display = 'none';
+      modalBackdrop.setAttribute('aria-hidden','true');
+    }
+    modalCancel.addEventListener('click', hideGameOptions);
+
+    // helper: some games should auto-lock cursor in-game (we'll inject a helper into about:blank/blob)
+    function shouldAutoLock(file){
+      const f = file.toLowerCase();
+      return f.includes('1v1.lol') || f.includes('buildnow.gg') || f.includes('buildnow');
     }
 
-    function hideModal(){
-      modal.classList.remove('show');
-      clearInterval(rageInterval);
+    // fetch the game's HTML content (assumes files are in root)
+    async function fetchGameHtml(file){
+      try{
+        const res = await fetch(file);
+        if(!res.ok) throw new Error('Fetch failed');
+        return await res.text();
+      }catch(e){
+        return `<html><body><h2>Failed to load ${file}</h2><pre>${e.toString()}</pre></body></html>`;
+      }
     }
 
-    // attach click handlers to leaves
-    document.querySelectorAll('.leaf').forEach(el=>{
-      el.addEventListener('click', ()=>{
-        const game = el.getAttribute('data-game');
-        showModalForGame(game);
+    // open in about:blank and inject helper script for pointer lock hint
+    openAboutBlankBtn.addEventListener('click', async ()=>{
+      if(!selectedGameFile) return;
+      modalMsg.textContent = 'Opening in about:blank...';
+      const html = await fetchGameHtml(selectedGameFile);
+      const win = window.open('about:blank');
+      if(!win){ modalMsg.textContent = 'Popup blocked — allow popups'; return; }
+      // inject small helper script into the new window to enable pointer lock on click and auto message for specific games
+      const helper = `
+        <script>
+          // add a floating "Lock Cursor" button for user to click (required to requestPointerLock)
+          (function(){
+            function addBtn(){
+              const b = document.createElement('button');
+              b.textContent = 'Lock Cursor';
+              b.style.position='fixed';b.style.zIndex=999999;b.style.right='12px';b.style.bottom='12px';b.style.padding='10px 12px';b.style.borderRadius='8px';b.style.background='#2b8a3e';b.style.color='white';b.style.border='none';
+              b.onclick = ()=>{ document.body.requestPointerLock && document.body.requestPointerLock(); b.textContent='Locked? (press Esc to exit)'; }
+              document.body.appendChild(b);
+            }
+            document.addEventListener('DOMContentLoaded', addBtn);
+            // if running in 1v1 or buildnow, show instruction overlay
+            const path = location.pathname.toLowerCase();
+            if(path.includes('1v1.lol') || path.includes('buildnow')) {
+              const o = document.createElement('div');
+              o.textContent = 'Tip: Click "Lock Cursor" to lock pointer while you play.';
+              o.style.position='fixed'; o.style.left='12px'; o.style.top='12px'; o.style.background='rgba(0,0,0,0.6)'; o.style.color='white'; o.style.padding='8px 10px'; o.style.borderRadius='8px'; o.style.zIndex='999999';
+              document.addEventListener('DOMContentLoaded', ()=>document.body.appendChild(o));
+            }
+          })();
+        <\/script>
+      `;
+      win.document.open();
+      win.document.write(html + helper);
+      win.document.close();
+      hideGameOptions();
+    });
+
+    // open via Blob URL (keeps original URL out of address, but still runs)
+    openBlobBtn.addEventListener('click', async ()=>{
+      if(!selectedGameFile) return;
+      modalMsg.textContent = 'Creating blob URL...';
+      const html = await fetchGameHtml(selectedGameFile);
+      // append similar helper
+      const helper = `
+        <script>
+          (function(){
+            function addBtn(){
+              const b = document.createElement('button');
+              b.textContent = 'Lock Cursor';
+              b.style.position='fixed';b.style.zIndex=999999;b.style.right='12px';b.style.bottom='12px';b.style.padding='10px 12px';b.style.borderRadius='8px';b.style.background='#2b8a3e';b.style.color='white';b.style.border='none';
+              b.onclick = ()=>{ document.body.requestPointerLock && document.body.requestPointerLock(); b.textContent='Locked? (press Esc to exit)'; }
+              document.body.appendChild(b);
+            }
+            document.addEventListener('DOMContentLoaded', addBtn);
+          })();
+        <\/script>
+      `;
+      const blob = new Blob([html + helper], {type:'text/html'});
+      const url = URL.createObjectURL(blob);
+      window.open(url);
+      hideGameOptions();
+    });
+
+    // "Fullscreen" button: navigate top window to file (user requested)
+    openFullscreenBtn.addEventListener('click', ()=> {
+      if(!selectedGameFile) return;
+      // navigate same tab to game (user asked no home screen on open)
+      window.location.href = selectedGameFile;
+    });
+
+    // wire leaf clicks to show modal
+    document.querySelectorAll('.leaf').forEach(leaf=>{
+      leaf.addEventListener('click', (e)=>{
+        const file = leaf.getAttribute('data-file');
+        if(!file) return;
+        showGameOptions(file);
+      });
+      // show small pop when hover (leaf pop up)
+      leaf.addEventListener('mouseenter', ()=> {
+        leaf.style.transform = 'translateY(-10px) scale(1.03)';
+      });
+      leaf.addEventListener('mouseleave', ()=> {
+        leaf.style.transform = '';
       });
     });
 
-    btnCancel.addEventListener('click', hideModal);
-
-    // ---------- open in about:blank ----------
-    btnAbout.addEventListener('click', async ()=>{
-      if(!selectedGame) return;
-      hideModal();
-      const win = window.open('about:blank');
-      try{
-        const res = await fetch(selectedGame);
-        const html = await res.text();
-        win.document.open();
-        win.document.write(html);
-        win.document.close();
-      }catch(e){
-        win.document.body.innerText = 'Failed to load game.';
-      }
-    });
-
-    // ---------- open as blob URL ----------
-    btnBlob.addEventListener('click', async ()=>{
-      if(!selectedGame) return;
-      hideModal();
-      try{
-        const res = await fetch(selectedGame);
-        const html = await res.text();
-        const blob = new Blob([html],{type:'text/html'});
-        const url = URL.createObjectURL(blob);
-        window.open(url, '_blank');
-      }catch(e){
-        alert('Failed to load as blob');
-      }
-    });
-
-    // ---------- open and attempt fullscreen ----------
-    btnFS.addEventListener('click', async ()=>{
-      if(!selectedGame) return;
-      hideModal();
-      try{
-        const res = await fetch(selectedGame);
-        const html = await res.text();
-        const win = window.open('about:blank');
-        // write a wrapper page that requests fullscreen on user gesture
-        const wrapper = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0">${html}<script>function goFS(){document.documentElement.requestFullscreen?.();}window.addEventListener('load',()=>{try{goFS()}catch(e){}});</script></body></html>`;
-        win.document.open();
-        win.document.write(wrapper);
-        win.document.close();
-      }catch(e){
-        alert('Failed to open fullscreen');
-      }
-    });
-
-    // close modal by clicking outside
-    modal.addEventListener('click', (ev)=>{ if(ev.target === modal) hideModal(); });
-
-    // ---------- theme / accent behavior ----------
-    document.getElementById('accentColor').addEventListener('input', e=>{ document.documentElement.style.setProperty('--accent', e.target.value); });
-    document.getElementById('leafTextColor').addEventListener('input', e=>{ document.querySelectorAll('.leaf').forEach(l=> l.style.color = e.target.value); });
-
-    // ---------- character previews (quick theme swaps) ----------
-    const charThemes = {
-      'spongebob': {bg:['#fff176','#fff'], accent:'#fdd835'},
-      'teen-titans': {bg:['linear-gradient(90deg,#ff007f,#00f0ff,#7fff00)',''], accent:'#ff00ff'},
-      'mickey': {bg:['#ff1744','#000'], accent:'#000'},
-      'tom-and-jerry': {bg:['#9e9e9e','#6d4c41'], accent:'#616161'},
-      'gumball': {bg:['#81d4fa','#eceff1'], accent:'#03a9f4'},
-      'squidward': {bg:['#82b1ff','#6d4c41'], accent:'#546e7a'},
-      'teen-titans': {bg:['#00ffea','#ff00d0'], accent:'#00ffea'}
+    /* ---------- characters preview & background color mapping ---------- */
+    const charMap = {
+      'spongebob': {name:'SpongeBob', bg:['#fff27a','#ffe9b6'], img:'spongebob.png'},
+      'patrick': {name:'Patrick', bg:['#ffd0e8','#c4ffda'], img:'patrick.png'},
+      'squidward': {name:'Squidward', bg:['#b7d7ff','#c9d0e0'], img:'squidward.png'},
+      'mickey': {name:'Mickey', bg:['#ffdfdf','#000000'], img:'mickey.png'},
+      'gumball': {name:'Gumball', bg:['#bfe7ff','#d3d3d3'], img:'gumball.png'},
+      'darwin': {name:'Darwin', bg:['#ffd4a8','#ccffb3'], img:'darwin.png'},
+      'tomandjerry': {name:'Tom & Jerry', bg:['#d9d9d9','#d7b89a'], img:'tom-and-jerry.png'},
+      'teen-titans': {name:'Teen Titans Go', bg:['linear-gradient(90deg,#00f,#f0f,#0ff,#0f0)','',''], img:'teen-titans-go.png'},
+      // fallback
+      'default': {name:'Character', bg:['#fff','#eee'], img:''}
     };
+
+    function showCharPanel(id){
+      const data = charMap[id] || charMap.default;
+      const panel = document.getElementById('charPanel');
+      const img = document.getElementById('charImg');
+      const name = document.getElementById('charName');
+      const desc = document.getElementById('charDesc');
+      name.textContent = data.name;
+      desc.textContent = `Preview: ${data.name}`;
+      if(data.img){
+        img.src = data.img;
+        img.style.display = 'block';
+      } else { img.style.display = 'none'; img.src=''; }
+      // change garden background colors
+      const garden = document.getElementById('garden');
+      if(id === 'teen-titans'){
+        garden.style.background = 'linear-gradient(90deg,#ff00ff,#00ffff,#00ff00)';
+      } else {
+        garden.style.background = `linear-gradient(180deg, ${data.bg[0]} 0 55%, ${data.bg[1] || '#fff'} 55% 100%)`;
+      }
+      panel.style.display = 'block';
+      // auto-hide after 6s
+      setTimeout(()=>{ panel.style.display = 'none'; applyTheme(); }, 6000);
+    }
+
     document.querySelectorAll('.char').forEach(c=>{
       c.addEventListener('click', ()=>{
-        const key = c.getAttribute('data-char');
-        if(!charThemes[key]) return;
-        const t = charThemes[key];
-        document.body.style.background = Array.isArray(t.bg) ? `linear-gradient(180deg, ${t.bg[0]} 0 55%, ${t.bg[1]||t.bg[0]} 55% 100%)` : t.bg;
-        document.documentElement.style.setProperty('--accent', t.accent);
+        const id = c.getAttribute('data-char');
+        showCharPanel(id);
       });
     });
 
-    // apply saved theme on load (simple)
-    (function loadSaved(){
-      const cc = storage.get('cursorColor');
-      if(cc) document.getElementById('cursorColor').value = cc;
+    /* ---------- load images into chars if present in root (non-blocking) ---------- */
+    (function tryLoadCharImages(){
+      ['gumball','teen-titans','mickey','tom-and-jerry','patrick','spongebob','squidward','darwin'].forEach(name=>{
+        const imgName = name === 'tom-and-jerry' ? 'tom-and-jerry.png' :
+                        name === 'teen-titans' ? 'teen-titans-go.png' :
+                        name + '.png';
+        // check by creating Image; if exists it'll load, otherwise fail silently
+        const im = new Image();
+        im.src = imgName;
+        im.onload = ()=> {
+          // replace corresponding char text with image
+          const el = Array.from(document.querySelectorAll('.char')).find(x=> x.getAttribute('data-char') === (name==='tom-and-jerry'?'tomandjerry':(name==='teen-titans'?'teen-titans':name)));
+          if(el){
+            el.innerHTML = `<img src="${imgName}" alt="${name}" style="max-width:64px;max-height:64px;display:block;margin:0 auto;">`;
+          }
+        }
+      });
     })();
 
+    /* ---------- load saved cursor settings on start ---------- */
+    (function loadSavedCursor(){
+      const cc = storage.get('cursorColor');
+      const cs = storage.get('cursorShape');
+      if(cc){ cursorColor = cc; document.getElementById('cursorColor').value = cc; }
+      if(cs){ cursorShape = cs; document.getElementById('cursorShape').value = cs; }
+      applyCursorStyle(cursorColor, cursorShape);
+    })();
+
+    /* ---------- accessibility: press Esc to hide modal ---------- */
+    window.addEventListener('keydown', e=>{
+      if(e.key === 'Escape'){ hideGameOptions(); document.getElementById('charPanel').style.display='none'; }
+    });
+
+    /* ---------- ensure leaves are clickable on touch devices ---------- */
+    document.querySelectorAll('.leaf').forEach(l=>{
+      l.addEventListener('touchstart', ()=> l.classList.add('touched'));
+      l.addEventListener('touchend', ()=> l.classList.remove('touched'));
+    });
+
+    /* ---------- make sure everything visible if JS disabled (minor) ---------- */
+    // (No-op)
+
+    // done initial setup
+    console.log('Nature Games Hub loaded — all features initialized.');
   </script>
 </body>
 </html>
