@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Nature Games Hub — Fixed</title>
+  <title>My Games — Nature Hub</title>
   <style>
     :root{
       --sky:#9ad3ff;
@@ -11,78 +11,66 @@
       --grass:#7ed957;
       --accent:#2b8a3e;
       --leaf-text:#064;
-      --ui-bg: rgba(255,255,255,0.88);
-      --cursor-color:#2b8a3e;
-      --cursor-shape:circle;
+      --ui-bg: rgba(255,255,255,0.9);
+      --cursor-color: #2b8a3e;
+      --cursor-shape: circle;
     }
     *{box-sizing:border-box}
-    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,Arial;color:#063}
+    html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;color:#063;cursor:auto}
     body{
       background: linear-gradient(180deg,var(--sky) 0 55%, var(--water) 55% 72%, var(--grass) 72% 100%);
-      overflow:auto;
-      cursor:none; /* hide system cursor — custom cursor below */
+      overflow-y:auto;
+      -webkit-font-smoothing:antialiased;
     }
-    header{padding:20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
-    .title{display:flex;gap:12px;align-items:center}
-    .logo{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#a7e7ff,#b8f1c9);box-shadow:0 6px 18px rgba(0,0,0,.12)}
+
+    header{padding:22px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .title{display:flex;align-items:center;gap:12px}
+    .logo{width:64px;height:64px;background:linear-gradient(180deg,#a7e7ff,#b8f1c9);border-radius:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,0.12)}
     h1{margin:0;font-size:20px}
     nav .controls{display:flex;gap:10px;align-items:center}
-    .status{background:var(--ui-bg);padding:8px 10px;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,.08);font-weight:700;font-size:14px}
+    .status{background:var(--ui-bg);padding:8px 10px;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,0.08);font-weight:600}
 
-    main{max-width:1100px;margin:14px auto;padding:18px}
+    main{max-width:1100px;margin:12px auto;padding:18px}
     .canvas-area{display:grid;grid-template-columns:1fr 340px;gap:18px;align-items:start}
 
-    /* garden */
-    .garden{background:rgba(255,255,255,0.6);padding:18px;border-radius:14px;min-height:480px;position:relative;overflow:hidden}
+    .garden{background:rgba(255,255,255,0.5);padding:18px;border-radius:14px;min-height:420px;position:relative;overflow:hidden}
     .sky-layer{position:absolute;inset:0;pointer-events:none}
-    .cloud{position:absolute;border-radius:50px;background:rgba(255,255,255,.9);filter:blur(2px)}
+    .cloud{position:absolute;top:20px;left:20px;width:160px;height:50px;border-radius:50px;background:rgba(255,255,255,0.85);filter:blur(2px)}
 
-    .leaf-grid{display:flex;flex-wrap:wrap;gap:18px}
-    .leaf{
-      width:180px;height:110px;display:flex;align-items:center;justify-content:center;position:relative;text-align:center;text-decoration:none;color:var(--leaf-text);font-weight:800;padding:8px;border-radius:60% 40% 60% 40% / 40% 60% 40% 60%;background:linear-gradient(135deg,#d8f5d8,#baf0b3);box-shadow:0 8px 20px rgba(0,0,0,0.12);transition:transform .18s, box-shadow .18s, z-index .18s;z-index:1;cursor:pointer;
-    }
-    .leaf:hover{transform:translateY(-10px) scale(1.04);z-index:3}
+    .leaf-grid{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start}
+    .leaf{width:180px;height:110px;display:flex;align-items:center;justify-content:center;position:relative;text-align:center;text-decoration:none;color:var(--leaf-text);font-weight:700;padding:8px;border-radius:60% 40% 60% 40% / 40% 60% 40% 60%;background:linear-gradient(135deg,#d8f5d8,#baf0b3);box-shadow:0 8px 20px rgba(0,0,0,0.12);transition:transform .18s ease, box-shadow .18s ease}
+    .leaf::after{content:'';position:absolute;bottom:-12px;left:20px;width:6px;height:36px;background:#6b4b2a;border-radius:3px;transform:rotate(-12deg)}
+    .leaf .name{z-index:2;pointer-events:none}
     .leaf .decor{position:absolute;inset:6px;border-radius:inherit;pointer-events:none}
-    .leaf .name{position:relative;z-index:2;pointer-events:none}
+    .leaf:hover{transform:translateY(-6px) scale(1.02)}
+    .leaf:hover .decor{box-shadow:0 0 0 8px rgba(0,0,0,0.03) inset}
 
-    /* control panel */
     aside.panel{background:var(--ui-bg);padding:14px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.08)}
-    .panel h3{margin:0 0 12px 0}
     .form-row{display:flex;gap:8px;align-items:center;margin-bottom:10px}
     .form-row label{min-width:110px;font-size:14px}
     input[type=color], select, button, input[type=range]{background:white;border:1px solid #ddd;padding:8px;border-radius:8px}
     .small{font-size:13px;color:#065}
 
     .widget{display:flex;align-items:center;justify-content:space-between;padding:8px;background:#fff;border-radius:8px;margin-bottom:10px}
-    .widget b{font-size:15px}
+    .widget b{font-size:16px}
 
     .chars{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-    .char{width:72px;height:72px;background:rgba(255,255,255,0.95);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;padding:6px;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,0.08);cursor:pointer}
+    .char{width:72px;height:72px;background:rgba(255,255,255,0.9);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;padding:6px;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,0.08);cursor:pointer}
 
-    footer{text-align:center;color:#064;margin:18px auto;max-width:1100px}
+    footer{max-width:1100px;margin:18px auto;text-align:center;color:#064}
 
-    /* modal game iframe */
-    .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:9998}
-    .overlay.show{display:flex}
-    .modal{width:90%;max-width:1100px;background:#fff;border-radius:12px;box-shadow:0 30px 80px rgba(0,0,0,.6);overflow:hidden;display:flex;flex-direction:column}
-    .modal-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #eee}
-    .modal-body{background:#000;min-height:60vh;display:flex;gap:12px}
-    .game-frame{flex:1;border:0;height:70vh;background:#000}
-    .game-controls{width:220px;background:#fff;padding:10px;box-sizing:border-box;display:flex;flex-direction:column;gap:8px}
-    .game-controls button{padding:8px;border-radius:8px;border:1px solid #ddd;background:#f8f8f8;cursor:pointer}
+    /* modal */
+    .modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);z-index:9998;opacity:0;pointer-events:none;transition:opacity .18s}
+    .modal.show{opacity:1;pointer-events:auto}
+    .modal-card{background:white;padding:18px;border-radius:12px;min-width:320px;max-width:90%;box-shadow:0 10px 40px rgba(0,0,0,0.3);text-align:center}
+    .loading-text{font-weight:800;margin:6px 0}
+    .rage-line{font-size:14px;margin:6px 0;color:#a22}
+    .modal-controls{display:flex;gap:8px;justify-content:center;margin-top:12px}
 
-    /* character popup */
-    .char-panel{position:absolute;right:14px;top:14px;width:220px;background:rgba(255,255,255,0.95);border-radius:12px;padding:10px;box-shadow:0 10px 30px rgba(0,0,0,0.12);display:none;z-index:9997}
-    .char-panel.show{display:block}
-    .char-panel img{max-width:100%;height:auto;border-radius:8px;display:block;margin-bottom:6px}
+    /* small helpers */
+    .hidden{display:none}
 
-    /* custom cursor */
-    .custom-cursor{position:fixed;pointer-events:none;z-index:10000;transform:translate(-50%,-50%);transition:width .12s height .12s background-color .12s border-radius .12s, transform .06s}
-    .cursor-star{width:26px;height:26px;border-radius:10%}
-    .cursor-square{width:22px;height:22px;border-radius:6px}
-    .cursor-circle{width:22px;height:22px;border-radius:50%}
-
-    @media (max-width:900px){.canvas-area{grid-template-columns:1fr}.game-controls{display:none}}
+    @media (max-width:900px){.canvas-area{grid-template-columns:1fr}.panel{order:2}.chars{justify-content:center}}
   </style>
 </head>
 <body>
@@ -94,59 +82,52 @@
         <div class="small">Green grass • Blue skies • Playful leaves</div>
       </div>
     </div>
-
     <nav class="controls">
       <div class="status" id="time">--:--:--</div>
       <div class="status" id="battery">Battery: --%</div>
-      <button id="customizeBtn" class="status" style="cursor:pointer">Customize</button>
+      <button id="customizeBtn">Customize</button>
     </nav>
   </header>
 
   <main>
     <div class="canvas-area">
       <section class="garden" aria-label="Game garden">
-        <div class="sky-layer" aria-hidden="true">
+        <div class="sky-layer">
           <div class="cloud" style="left:10%;top:6%;width:220px;height:66px;opacity:.9"></div>
           <div class="cloud" style="left:60%;top:28%;width:160px;height:46px;opacity:.85"></div>
         </div>
 
         <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px">
           <div style="font-weight:800;font-size:18px">Your Games</div>
-          <div class="small">Hover a leaf to preview your chosen accent — click to open</div>
+          <div class="small">Click a leaf to open game options (modal)</div>
         </div>
 
         <div class="leaf-grid" id="leafGrid">
-          <!-- NOTE: filenames below match exactly what you uploaded -->
-          <a class="leaf" data-file="1v1.LoL.html"><div class="decor"></div><div class="name">1v1.LoL</div></a>
-          <a class="leaf" data-file="Amanda the Adventurer.html"><div class="decor"></div><div class="name">Amanda the Adventurer</div></a>
-          <a class="leaf" data-file="Backrooms.html"><div class="decor"></div><div class="name">Backrooms</div></a>
-          <a class="leaf" data-file="Baldi's Basics.html"><div class="decor"></div><div class="name">Baldi's Basics</div></a>
-          <a class="leaf" data-file="Baseball Bros.html"><div class="decor"></div><div class="name">Baseball Bros</div></a>
-          <a class="leaf" data-file="Basket Bros.html"><div class="decor"></div><div class="name">Basket Bros</div></a>
-          <a class="leaf" data-file="Block Blast.html"><div class="decor"></div><div class="name">Block Blast</div></a>
-          <a class="leaf" data-file="BuildNow.gg.html"><div class="decor"></div><div class="name">BuildNow.gg</div></a>
-          <a class="leaf" data-file="Chat Bot (A._.I).html"><div class="decor"></div><div class="name">Chat Bot (A._.I)</div></a>
-          <a class="leaf" data-file="Football Bros.html"><div class="decor"></div><div class="name">Football Bros</div></a>
-          <a class="leaf" data-file="Friday Night Funkin.html"><div class="decor"></div><div class="name">Friday Night Funkin</div></a>
-          <a class="leaf" data-file="Minecraft 1.21.4 (1).html"><div class="decor"></div><div class="name">Minecraft 1.21.4</div></a>
-          <a class="leaf" data-file="OvO 2.html"><div class="decor"></div><div class="name">OvO 2</div></a>
-          <a class="leaf" data-file="OvO 3 Dimensions.html"><div class="decor"></div><div class="name">OvO 3 Dimensions</div></a>
-          <a class="leaf" data-file="OvO.html"><div class="decor"></div><div class="name">OvO</div></a>
-          <a class="leaf" data-file="Stickman Fight Ragdoll.html"><div class="decor"></div><div class="name">Stickman Fight Ragdoll</div></a>
-          <a class="leaf" data-file="Stickman Hook.html"><div class="decor"></div><div class="name">Stickman Hook</div></a>
+          <!-- Game links: these are files the user uploaded in repo root -->
+          <a class="leaf" data-game="1v1.LoL.html" href="#" onclick="return false;"><div class="decor"></div><div class="name">1v1.LoL</div></a>
+          <a class="leaf" data-game="Amanda the Adventurer.html" href="#" onclick="return false;"><div class="decor"></div><div class="name">Amanda the Adventurer</div></a>
+          <a class="leaf" data-game="Backrooms.html" href="#" onclick="return false;"><div class="decor"></div><div class="name">Backrooms</div></a>
+          <a class="leaf" data-game="Baldi's Basics.html" href="#" onclick="return false;"><div class="decor"></div><div class="name">Baldi's Basics</div></a>
+          <a class="leaf" data-game="Baseball Bros.html" href="#" onclick="return false;"><div class="decor"></div><div class="name">Baseball Bros</div></a>
+          <a class="leaf" data-game="Basket Bros.html" href="#" onclick="return false;"><div class="decor"></div><div class="name">Basket Bros</div></a>
+          <a class="leaf" data-game="Block Blast.html" href="#" onclick="return false;"><div class="decor"></div><div class="name">Block Blast</div></a>
+          <a class="leaf" data-game="BuildNow.gg.html" href="#" onclick="return false;"><div class="decor"></div><div class="name">BuildNow.gg</div></a>
+          <a class="leaf" data-game="Chat Bot (A._.I).html" href="#" onclick="return false;"><div class="decor"></div><div class="name">Chat Bot (A._.I)</div></a>
+          <a class="leaf" data-game="Football Bros.html" href="#" onclick="return false;"><div class="decor"></div><div class="name">Football Bros</div></a>
+          <a class="leaf" data-game="Friday Night Funkin.html" href="#" onclick="return false;"><div class="decor"></div><div class="name">Friday Night Funkin</div></a>
+          <a class="leaf" data-game="Minecraft 1.21.4 (1).html" href="#" onclick="return false;"><div class="decor"></div><div class="name">Minecraft 1.21.4</div></a>
+          <a class="leaf" data-game="OvO 2.html" href="#" onclick="return false;"><div class="decor"></div><div class="name">OvO 2</div></a>
+          <a class="leaf" data-game="OvO 3 Dimensions.html" href="#" onclick="return false;"><div class="decor"></div><div class="name">OvO 3 Dimensions</div></a>
+          <a class="leaf" data-game="OvO.html" href="#" onclick="return false;"><div class="decor"></div><div class="name">OvO</div></a>
+          <a class="leaf" data-game="Stickman Fight Ragdoll.html" href="#" onclick="return false;"><div class="decor"></div><div class="name">Stickman Fight Ragdoll</div></a>
+          <a class="leaf" data-game="Stickman Hook.html" href="#" onclick="return false;"><div class="decor"></div><div class="name">Stickman Hook</div></a>
         </div>
 
-        <!-- Bible verse -->
         <div id="verseBox" style="position:absolute;left:18px;bottom:18px;background:rgba(255,255,255,0.95);padding:12px;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,0.08);max-width:420px;font-size:14px">
           <div style="font-weight:800;margin-bottom:6px">Daily Verse</div>
           <div id="verseText">Loading verse...</div>
         </div>
 
-        <!-- character popup (shows image & background effect) -->
-        <div id="charPanel" class="char-panel" role="dialog" aria-hidden="true">
-          <img id="charImg" src="" alt="">
-          <div id="charName" style="font-weight:800"></div>
-        </div>
       </section>
 
       <aside class="panel">
@@ -163,92 +144,75 @@
         <div style="margin-top:10px"><button id="saveBtn">Save settings</button> <button id="resetBtn">Reset</button></div>
 
         <hr style="margin:12px 0">
-
         <div class="widget"><div><b>Local Time</b><div id="timeBig" class="small"></div></div><div id="tzNote" class="small"></div></div>
         <div class="widget"><div><b>Battery</b><div id="batteryBig" class="small">--%</div></div><div id="charging" class="small"></div></div>
 
         <h3 style="margin-top:12px">Cartoon badges</h3>
-        <div class="small">(click a badge to show character)</div>
+        <div class="small">(Click a character to preview theme)</div>
         <div class="chars" id="chars">
-          <div class="char" data-img="gumball.png" data-name="Gumball">Gumball</div>
-          <div class="char" data-img="teen-titans-go.png" data-name="Teen Titans Go">Teen Titans Go</div>
-          <div class="char" data-img="mickey.png" data-name="Mickey Mouse">Mickey</div>
-          <div class="char" data-img="tom-and-jerry.png" data-name="Tom & Jerry">Tom & Jerry</div>
-          <div class="char" data-img="spongebob.png" data-name="SpongeBob">SpongeBob</div>
-          <div class="char" data-img="patrick.png" data-name="Patrick">Patrick</div>
-          <div class="char" data-img="squidward.png" data-name="Squidward">Squidward</div>
-          <div class="char" data-img="darwin.png" data-name="Darwin">Darwin</div>
+          <div class="char" data-char="gumball">Gumball</div>
+          <div class="char" data-char="teen-titans">Teen Titans<br>Go</div>
+          <div class="char" data-char="mickey">Mickey<br>Clubhouse</div>
+          <div class="char" data-char="tom-and-jerry">Tom & Jerry</div>
+          <div class="char" data-char="spongebob">SpongeBob<br>& Patrick</div>
+          <div class="char" data-char="squidward">Squidward</div>
         </div>
 
       </aside>
     </div>
   </main>
 
-  <footer>Built with 🌿 — your preferences are saved locally.</footer>
+  <footer>
+    Built with 🌿 — change settings in "Customize". Your preferences are saved locally.
+  </footer>
 
-  <!-- game modal (iframe) -->
-  <div id="overlay" class="overlay" role="dialog" aria-hidden="true">
-    <div class="modal" role="document">
-      <div class="modal-header">
-        <div id="modalTitle" style="font-weight:800">Game</div>
-        <div>
-          <button id="backBtn" style="margin-right:8px">Back</button>
-          <button id="unlockBtn" style="margin-right:8px">Unlock Cursor</button>
-          <button id="lockBtn" style="margin-right:8px">Lock Cursor</button>
-        </div>
-      </div>
-      <div class="modal-body">
-        <iframe id="gameFrame" class="game-frame" sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock" allowfullscreen></iframe>
-        <div class="game-controls">
-          <div style="font-weight:700;margin-bottom:6px">Game Options</div>
-          <button id="openNew">Open in new tab</button>
-          <button id="reloadGame">Reload</button>
-          <div style="font-size:13px;color:#444;margin-top:8px">Note: Pointer lock will hide cursor while active. Use Unlock Cursor to show it.</div>
-        </div>
+  <!-- Modal for game options + loading -->
+  <div id="gameModal" class="modal" aria-hidden="true">
+    <div class="modal-card">
+      <div id="modalTitle" style="font-size:16px;font-weight:800">Getting ready...</div>
+      <div class="loading-text" id="loadingText">Preparing your game</div>
+      <div class="rage-line" id="rageLine">Please wait...</div>
+      <div class="modal-controls">
+        <button id="btnAbout" disabled>Open in about:blank</button>
+        <button id="btnBlob" disabled>Open in Blob URL</button>
+        <button id="btnFS" disabled>Open Fullscreen</button>
+        <button id="btnCancel" style="background:transparent;color:#b33;border:0;font-weight:700">Cancel</button>
       </div>
     </div>
   </div>
 
-  <!-- custom cursor -->
-  <div id="customCursor" class="custom-cursor cursor-circle" aria-hidden="true"></div>
-
   <script>
-    /* ---------------- persistence ---------------- */
+    // ---------- storage ----------
     const storage = {
-      get(k, d){ try { return JSON.parse(localStorage.getItem(k)) ?? d } catch(e){ return d } },
-      set(k,v){ localStorage.setItem(k, JSON.stringify(v)) }
+      get(k,d){try{return JSON.parse(localStorage.getItem(k)) ?? d}catch(e){return d}},
+      set(k,v){localStorage.setItem(k,JSON.stringify(v))}
     };
 
-    /* ----------- time & date & battery ---------- */
+    // ---------- time & battery ----------
     function updateTime(){
       const now = new Date();
       document.getElementById('time').textContent = now.toLocaleTimeString();
       document.getElementById('timeBig').textContent = now.toLocaleTimeString() + ' • ' + now.toLocaleDateString();
     }
-    updateTime(); setInterval(updateTime, 1000);
+    updateTime(); setInterval(updateTime,1000);
 
     async function initBattery(){
       const el = document.getElementById('battery');
       const big = document.getElementById('batteryBig');
-      try {
+      try{
         const bat = await navigator.getBattery();
         function render(){
           const pct = Math.round(bat.level*100);
-          el.textContent = 'Battery: ' + pct + '%';
-          big.textContent = pct + '%';
-          document.getElementById('charging').textContent = bat.charging ? 'Charging' : 'Not charging';
+          el.textContent = 'Battery: '+pct+'%';
+          big.textContent = pct+'%';
+          document.getElementById('charging').textContent = bat.charging? 'Charging':'Not charging';
         }
-        render();
-        bat.addEventListener('levelchange', render);
-        bat.addEventListener('chargingchange', render);
-      } catch(e){
-        el.textContent = 'Battery: ?';
-        big.textContent = '?';
-      }
+        render(); bat.addEventListener('levelchange',render); bat.addEventListener('chargingchange',render);
+      }catch(e){el.textContent='Battery: ?'; big.textContent='?';}
     }
     initBattery();
 
-    /* ----------- bible verse (daily) ---------- */
+    // ---------- verse that changes nightly ----------
     const verses = [
       "For I know the plans I have for you. — Jeremiah 29:11",
       "I can do all things through Christ who strengthens me. — Philippians 4:13",
@@ -261,261 +225,169 @@
       "Give thanks to the LORD, for he is good. — Psalm 107:1",
       "Commit your work to the LORD, and your plans will be established. — Proverbs 16:3"
     ];
+
     function verseIndexForDate(d){
       const epoch = new Date(2020,0,1);
-      const days = Math.floor((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()) - Date.UTC(epoch.getFullYear(),epoch.getMonth(),epoch.getDate()))/86400000);
+      const days = Math.floor((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())-Date.UTC(epoch.getFullYear(),epoch.getMonth(),epoch.getDate()))/86400000);
       return Math.abs(days) % verses.length;
     }
     function renderVerse(){
-      const i = verseIndexForDate(new Date());
-      document.getElementById('verseText').textContent = verses[i];
+      document.getElementById('verseText').textContent = verses[verseIndexForDate(new Date())];
     }
     renderVerse();
-    function scheduleMidnightUpdate(){
+    // schedule midnight update
+    (function scheduleMidnight(){
       const now = new Date();
-      const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1, 0, 0, 1);
+      const tomorrow = new Date(now.getFullYear(),now.getMonth(),now.getDate()+1,0,0,2);
       const ms = tomorrow - now;
-      setTimeout(()=>{ renderVerse(); scheduleMidnightUpdate(); }, ms);
-    }
-    scheduleMidnightUpdate();
-
-    /* ----------- custom cursor ---------- */
-    const customCursor = document.getElementById('customCursor');
-    let cursorColor = storage.get('cursorColor', getComputedStyle(document.documentElement).getPropertyValue('--cursor-color') || '#2b8a3e');
-    let cursorShape = storage.get('cursorShape','circle');
-
-    function applyCursorStyle(){
-      customCursor.style.background = cursorColor;
-      customCursor.classList.remove('cursor-circle','cursor-square','cursor-star');
-      if(cursorShape === 'circle'){ customCursor.classList.add('cursor-circle') }
-      else if(cursorShape === 'square'){ customCursor.classList.add('cursor-square') }
-      else { customCursor.classList.add('cursor-star') }
-    }
-    applyCursorStyle();
-
-    window.addEventListener('mousemove', e => {
-      customCursor.style.left = e.clientX + 'px';
-      customCursor.style.top = e.clientY + 'px';
-    });
-
-    document.addEventListener('pointerlockchange', () => {
-      if(document.pointerLockElement){
-        // hide custom cursor when pointer locked (browser hides system cursor)
-        customCursor.style.display = 'none';
-      } else {
-        customCursor.style.display = '';
-      }
-    });
-
-    /* ----------- settings UI bindings ---------- */
-    document.getElementById('cursorColor').value = cursorColor;
-    document.getElementById('cursorShape').value = cursorShape;
-    document.getElementById('accentColor').value = storage.get('accentColor', '#2b8a3e');
-    document.getElementById('leafTextColor').value = storage.get('leafTextColor', '#064');
-    document.getElementById('presetTheme').value = storage.get('theme', 'day');
-
-    document.getElementById('cursorColor').addEventListener('input', e => { cursorColor = e.target.value; storage.set('cursorColor', cursorColor); applyCursorStyle(); });
-    document.getElementById('cursorShape').addEventListener('change', e => { cursorShape = e.target.value; storage.set('cursorShape', cursorShape); applyCursorStyle(); });
-
-    document.getElementById('accentColor').addEventListener('input', e => { document.documentElement.style.setProperty('--accent', e.target.value); });
-    document.getElementById('leafTextColor').addEventListener('input', e => { document.documentElement.style.setProperty('--leaf-text', e.target.value); document.querySelectorAll('.leaf').forEach(l => l.style.color = e.target.value); });
-
-    document.getElementById('saveBtn').addEventListener('click', () => {
-      storage.set('accentColor', document.getElementById('accentColor').value);
-      storage.set('leafTextColor', document.getElementById('leafTextColor').value);
-      storage.set('theme', document.getElementById('presetTheme').value);
-      applyTheme();
-      alert('Settings saved locally');
-    });
-
-    document.getElementById('resetBtn').addEventListener('click', () => { localStorage.clear(); location.reload(); });
-
-    function applyTheme(){
-      const accent = storage.get('accentColor', document.getElementById('accentColor').value || '#2b8a3e');
-      const leafText = storage.get('leafTextColor', document.getElementById('leafTextColor').value || '#064');
-      document.documentElement.style.setProperty('--accent', accent);
-      document.documentElement.style.setProperty('--leaf-text', leafText);
-      document.querySelectorAll('.leaf').forEach(leaf => {
-        leaf.style.color = leafText;
-        // hover glow uses accent; set event handlers
-        leaf.addEventListener('mouseenter', () => {
-          leaf.style.boxShadow = `0 12px 30px ${accent}55`;
-          const dec = leaf.querySelector('.decor');
-          if(dec) dec.style.boxShadow = `0 0 0 8px ${accent}33 inset`;
-        });
-        leaf.addEventListener('mouseleave', () => {
-          leaf.style.boxShadow = '';
-          const dec = leaf.querySelector('.decor');
-          if(dec) dec.style.boxShadow = '';
-        });
-      });
-
-      const theme = storage.get('theme', document.getElementById('presetTheme').value || 'day');
-      if(theme === 'day'){
-        document.documentElement.style.setProperty('--sky','#9ad3ff');
-        document.documentElement.style.setProperty('--water','#57b3ff');
-        document.documentElement.style.setProperty('--grass','#7ed957');
-      } else if(theme === 'dusk'){
-        document.documentElement.style.setProperty('--sky','#ffc3a0');
-        document.documentElement.style.setProperty('--water','#6fb3ff');
-        document.documentElement.style.setProperty('--grass','#6ec06e');
-      } else {
-        document.documentElement.style.setProperty('--sky','#0b3b5c');
-        document.documentElement.style.setProperty('--water','#0f4c81');
-        document.documentElement.style.setProperty('--grass','#184d2b');
-      }
-    }
-    applyTheme();
-
-    /* ----------- game modal logic ---------- */
-    const overlay = document.getElementById('overlay');
-    const gameFrame = document.getElementById('gameFrame');
-    const modalTitle = document.getElementById('modalTitle');
-    const backBtn = document.getElementById('backBtn');
-    const openNewBtn = document.getElementById('openNew');
-    const reloadBtn = document.getElementById('reloadGame');
-    const lockBtn = document.getElementById('lockBtn');
-    const unlockBtn = document.getElementById('unlockBtn');
-
-    let currentGame = '';
-
-    // clickable leaves open modal
-    document.querySelectorAll('.leaf').forEach(leaf => {
-      leaf.addEventListener('click', (e) => {
-        const file = leaf.getAttribute('data-file');
-        if(!file) return;
-        openGame(file, leaf.querySelector('.name')?.textContent || file);
-      });
-    });
-
-    function openGame(file, title){
-      currentGame = file;
-      modalTitle.textContent = title;
-      // set iframe src (same-origin files in repo root)
-      // for GitHub Pages this should work assuming files exist at root
-      gameFrame.src = file;
-      overlay.classList.add('show');
-      overlay.setAttribute('aria-hidden','false');
-
-      // auto-request pointer lock for specific games (must be called inside user gesture — openGame is called from click so it's okay)
-      if(file === '1v1.LoL.html' || file === 'BuildNow.gg.html'){
-        // try request pointer lock on iframe element
-        setTimeout(()=> {
-          try {
-            gameFrame.requestPointerLock();
-            // hide custom cursor — pointerlockchange will handle it
-          } catch(err){
-            // could fail depending on browser, fallback: show instructions
-            console.warn('Pointer lock request failed', err);
-          }
-        }, 50);
-      }
-    }
-
-    backBtn.addEventListener('click', closeGame);
-    function closeGame(){
-      // exit pointer lock if active
-      if(document.pointerLockElement) document.exitPointerLock();
-      gameFrame.src = 'about:blank';
-      overlay.classList.remove('show');
-      overlay.setAttribute('aria-hidden','true');
-      currentGame = '';
-    }
-
-    openNewBtn.addEventListener('click', () => {
-      if(currentGame) window.open(currentGame, '_blank');
-    });
-    reloadBtn.addEventListener('click', () => {
-      if(gameFrame.src && gameFrame.src !== 'about:blank') gameFrame.contentWindow.location.reload();
-    });
-
-    lockBtn.addEventListener('click', () => {
-      try { gameFrame.requestPointerLock(); } catch(e){ console.warn(e) }
-    });
-    unlockBtn.addEventListener('click', () => {
-      try { if(document.pointerLockElement) document.exitPointerLock(); } catch(e){ console.warn(e) }
-    });
-
-    // Close modal if user clicks overlay (outside modal)
-    overlay.addEventListener('click', (e) => {
-      if(e.target === overlay) closeGame();
-    });
-
-    /* ----------- cartoon badges behavior ---------- */
-    const charPanel = document.getElementById('charPanel');
-    const charImg = document.getElementById('charImg');
-    const charName = document.getElementById('charName');
-
-    // mapping: filename -> [bgColor1, bgColor2]
-    const charStyles = {
-      'SpongeBob': ['#fff176','#fff59d'],   // yellow & white
-      'Patrick': ['#ffb6c1','#b4f7c4'],     // pink & green
-      'Squidward': ['#b3cde0','#6b4b2a'],   // blue & brown (approx)
-      'Mickey Mouse': ['#ff4d4d','#000000'],// red & black
-      'Gumball': ['#8fd3ff','#cfd6d9'],     // blue & gray
-      'Darwin': ['#ffb347','#98fb98'],      // orange & green
-      'Tom & Jerry': ['#d0d0d0','#a97455'], // gray & brown
-      'Teen Titans Go': ['#00ffea','#ff00ff'] // neon-ish placeholder (we'll create neon gradient)
-    };
-
-    document.querySelectorAll('.char').forEach(c => {
-      c.addEventListener('click', () => {
-        const img = c.dataset.img;
-        const name = c.dataset.name || c.textContent.trim();
-        showCharacter(img,name);
-      });
-    });
-
-    function showCharacter(filename, name){
-      charImg.src = filename;
-      charImg.alt = name;
-      charName.textContent = name;
-      // style garden background depending on chosen character
-      const garden = document.querySelector('.garden');
-      const mapKey = name;
-      if(mapKey === 'Teen Titans Go'){
-        garden.style.background = 'linear-gradient(135deg, #0ff 0%, #f0f 50%, #0f0 100%)';
-      } else {
-        const s = charStyles[mapKey] || ['#ffffff','#f0f0f0'];
-        garden.style.background = `linear-gradient(180deg, ${s[0]} 0%, ${s[1]} 100%)`;
-      }
-      // show panel
-      charPanel.classList.add('show');
-      charPanel.setAttribute('aria-hidden','false');
-      // auto-hide after 8s
-      clearTimeout(charPanel._hideTimer);
-      charPanel._hideTimer = setTimeout(()=> {
-        charPanel.classList.remove('show');
-        charPanel.setAttribute('aria-hidden','true');
-        // restore theme background
-        applyTheme();
-      }, 8000);
-    }
-
-    /* ----------- restore saved cursor preferences on load ---------- */
-    (function loadSaved(){
-      const cc = storage.get('cursorColor');
-      const cs = storage.get('cursorShape');
-      if(cc){ cursorColor = cc; document.getElementById('cursorColor').value = cc }
-      if(cs){ cursorShape = cs; document.getElementById('cursorShape').value = cs }
-      applyCursorStyle();
+      setTimeout(()=>{renderVerse(); scheduleMidnight();}, ms);
     })();
 
-    /* ----------- utility: ensure leaves are keyboard accessible ---------- */
-    document.querySelectorAll('.leaf').forEach(leaf => {
-      leaf.setAttribute('tabindex','0');
-      leaf.addEventListener('keydown', e => {
-        if(e.key === 'Enter' || e.key === ' ') leaf.click();
+    // ---------- modal + loading messages ----------
+    const modal = document.getElementById('gameModal');
+    const loadingText = document.getElementById('loadingText');
+    const rageLine = document.getElementById('rageLine');
+    const btnAbout = document.getElementById('btnAbout');
+    const btnBlob = document.getElementById('btnBlob');
+    const btnFS = document.getElementById('btnFS');
+    const btnCancel = document.getElementById('btnCancel');
+    const modalTitle = document.getElementById('modalTitle');
+
+    const rageMessages = [
+      "loading... why did you click already?",
+      "are you ready? it's loading like a potato",
+      "rage mode engaged: still loading",
+      "calm down, it's not a boss fight — yet",
+      "if this takes longer you owe me a snack",
+      "processing your hopes and dreams... 42%",
+      "oh come on. refresh? don't refresh.",
+      "the internet gremlins are working, please wait"
+    ];
+
+    let selectedGame = null;
+    let rageInterval = null;
+
+    function showModalForGame(game){
+      selectedGame = game;
+      modalTitle.textContent = `Open: ${game}`;
+      loadingText.textContent = `Preparing ${game}...`;
+      rageLine.textContent = rageMessages[0];
+      // disable buttons until "loaded"
+      btnAbout.disabled = btnBlob.disabled = btnFS.disabled = true;
+      modal.classList.add('show');
+
+      // cycle rage lines
+      let idx = 0;
+      clearInterval(rageInterval);
+      rageInterval = setInterval(()=>{
+        idx = (idx+1) % rageMessages.length;
+        rageLine.textContent = rageMessages[idx];
+      }, 600);
+
+      // simulate loading delay (short) then enable buttons
+      setTimeout(()=>{
+        clearInterval(rageInterval);
+        rageLine.textContent = "Ready! Use the buttons to open the game.";
+        btnAbout.disabled = btnBlob.disabled = btnFS.disabled = false;
+      }, 2000);
+    }
+
+    function hideModal(){
+      modal.classList.remove('show');
+      clearInterval(rageInterval);
+    }
+
+    // attach click handlers to leaves
+    document.querySelectorAll('.leaf').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        const game = el.getAttribute('data-game');
+        showModalForGame(game);
       });
     });
 
-    /* ----------- final touches: show cookie-ish saved accent etc ---------- */
-    applyTheme();
+    btnCancel.addEventListener('click', hideModal);
 
-    // Make sure iframe pointerLock works cross-browser: provide message if blocked
-    window.addEventListener('pointerlockerror', () => {
-      console.warn('Pointer lock error');
+    // ---------- open in about:blank ----------
+    btnAbout.addEventListener('click', async ()=>{
+      if(!selectedGame) return;
+      hideModal();
+      const win = window.open('about:blank');
+      try{
+        const res = await fetch(selectedGame);
+        const html = await res.text();
+        win.document.open();
+        win.document.write(html);
+        win.document.close();
+      }catch(e){
+        win.document.body.innerText = 'Failed to load game.';
+      }
     });
+
+    // ---------- open as blob URL ----------
+    btnBlob.addEventListener('click', async ()=>{
+      if(!selectedGame) return;
+      hideModal();
+      try{
+        const res = await fetch(selectedGame);
+        const html = await res.text();
+        const blob = new Blob([html],{type:'text/html'});
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+      }catch(e){
+        alert('Failed to load as blob');
+      }
+    });
+
+    // ---------- open and attempt fullscreen ----------
+    btnFS.addEventListener('click', async ()=>{
+      if(!selectedGame) return;
+      hideModal();
+      try{
+        const res = await fetch(selectedGame);
+        const html = await res.text();
+        const win = window.open('about:blank');
+        // write a wrapper page that requests fullscreen on user gesture
+        const wrapper = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0">${html}<script>function goFS(){document.documentElement.requestFullscreen?.();}window.addEventListener('load',()=>{try{goFS()}catch(e){}});</script></body></html>`;
+        win.document.open();
+        win.document.write(wrapper);
+        win.document.close();
+      }catch(e){
+        alert('Failed to open fullscreen');
+      }
+    });
+
+    // close modal by clicking outside
+    modal.addEventListener('click', (ev)=>{ if(ev.target === modal) hideModal(); });
+
+    // ---------- theme / accent behavior ----------
+    document.getElementById('accentColor').addEventListener('input', e=>{ document.documentElement.style.setProperty('--accent', e.target.value); });
+    document.getElementById('leafTextColor').addEventListener('input', e=>{ document.querySelectorAll('.leaf').forEach(l=> l.style.color = e.target.value); });
+
+    // ---------- character previews (quick theme swaps) ----------
+    const charThemes = {
+      'spongebob': {bg:['#fff176','#fff'], accent:'#fdd835'},
+      'teen-titans': {bg:['linear-gradient(90deg,#ff007f,#00f0ff,#7fff00)',''], accent:'#ff00ff'},
+      'mickey': {bg:['#ff1744','#000'], accent:'#000'},
+      'tom-and-jerry': {bg:['#9e9e9e','#6d4c41'], accent:'#616161'},
+      'gumball': {bg:['#81d4fa','#eceff1'], accent:'#03a9f4'},
+      'squidward': {bg:['#82b1ff','#6d4c41'], accent:'#546e7a'},
+      'teen-titans': {bg:['#00ffea','#ff00d0'], accent:'#00ffea'}
+    };
+    document.querySelectorAll('.char').forEach(c=>{
+      c.addEventListener('click', ()=>{
+        const key = c.getAttribute('data-char');
+        if(!charThemes[key]) return;
+        const t = charThemes[key];
+        document.body.style.background = Array.isArray(t.bg) ? `linear-gradient(180deg, ${t.bg[0]} 0 55%, ${t.bg[1]||t.bg[0]} 55% 100%)` : t.bg;
+        document.documentElement.style.setProperty('--accent', t.accent);
+      });
+    });
+
+    // apply saved theme on load (simple)
+    (function loadSaved(){
+      const cc = storage.get('cursorColor');
+      if(cc) document.getElementById('cursorColor').value = cc;
+    })();
 
   </script>
 </body>
